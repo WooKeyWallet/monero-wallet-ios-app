@@ -1,0 +1,186 @@
+/* 
+  Localizable.strings
+*/
+
+// MARK: - Simple Words
+
+"next" = "下一步";
+"settings" = "设置";
+"assets" = "资产";
+"confirm" = "确定";
+"cancel" = "取消";
+"ok" = "OK";
+"import" = "导入";
+"verify" = "验证";
+"copy" = "复制";
+"send" = "发送";
+"receive" = "接收";
+"all" = "全部";
+"in" = "接收";
+"out" = "发送";
+"success" = "成功";
+"failure" = "失败";
+"proccessing" = "进行中";
+"optional" = "选填";
+"label" = "备注";
+"token" = "地址";
+"noData" = "暂无交易记录";
+"not_recognized" = "无法识别";
+"add_fail" = "添加失败";
+"pwdTips" = "密码提示";
+"delete" = "删除";
+"address" = "地址";
+"coinSelect" = "选择币种";
+"optional" = "（选填）";
+"none" = "无";
+"scan" = "扫一扫";
+"photos" = "相册";
+
+"publicViewKey" = "查看公钥";
+"secretViewKey" = "查看私钥";
+"publicSpendKey" = "支付公钥";
+"secretSpendKey" = "支付私钥";
+"walletAddress" = "钱包地址";
+
+"loadFail" = "加载失败";
+
+"language_select" = "选择语言";
+
+"failToVerify" = "验证失败，请重试";
+
+"moreNodeAddress" = "更多节点地址 >>";
+
+
+// MARK: - Add Wallet
+
+"wallet.add.create" = "创建钱包";
+"wallet.add.import" = "导入钱包";
+"wallet.add.slogen" = "为隐私而生";
+"wallet.add.tips" = "使用WooKey Wallet至少需要一个钱包，您可以选择创建钱包或导入已有的钱包";
+"wallet.create.tip1" = "为了保护您的资产安全，请先设置密码，密码用于私钥和交易授权";
+"wallet.create.tip2" = "密码为本地密码，WooKey 将不存储密码，也无法找回，请务必妥善保管";
+"wallet.create.tip3" = "不少于8位，建议混合大小写字母、数字、特殊符号";
+"wallet.create.agreement" = "我已仔细阅读并同意";
+"wallet.create.servicebook" = "服务及隐私条款";
+"wallet.create.name" = "钱包名称";
+"wallet.create.pwd" = "设置密码";
+"wallet.create.pwdConfirm" = "确认密码";
+"wallet.create.pwdMsg" = "密码提示（选填）";
+"wallet.import.tokenSelect" = "币种选择";
+"wallet.import.fromWords" = "助记词导入";
+"wallet.import.fromKeys" = "私钥导入";
+
+"settings.wallet" = "钱包管理";
+"settings.pin" = "PIN码";
+"settings.token" = "地址簿";
+"settings.node" = "节点设置";
+"settings.lang" = "语言";
+"settings.help" = "联系我们";
+"settings.about" = "关于 WooKey";
+"settings.node.suffix" = " 节点设置";
+
+"node.add.alert.title" = "请输入有效的节点地址";
+"node.delete.alert.title" = "节点删除";
+"node.delete.alert.msg" = "确定删除节点 $0 吗？";
+"node.add.alert.placeholder" = "请输入节点地址";
+"node.add.alert.msg" = "当前节点为XMR";
+"node.verify.error" = "节点连接失败，请重试";
+
+"words.input.title" = "助记词";
+"words.input.placeholder" = "输入助记词，用空格分割";
+"words.input.blockNum" = "区块号（选填）";
+"words.input.transDate" = "近期交易日期（选填）";
+
+"words.create.tip1" = "备份助记词：\n助记词用于恢复钱包，请将它准确的抄写在纸上并存放在安全的地方";
+"words.create.tip2" = "请勿截图，如果有人获取您的助记词将直接获取您的资产";
+"words.list.title" = "请抄写您的助记词";
+"words.list.confirm" = "我已抄写保存";
+"words.verify.tip" = "为了确保您已将助记词正确抄写，请选择对应序号的单词";
+"words.verify.input.title" = "请确认您的助记词";
+"words.verify.seed.title" = "请按以上序号顺序点击助记词";
+
+"keys.input.tips" = "请在下方表格输入您的私钥，并注意字符大小写";
+"keys.input.look" = "输入您的查看私钥";
+"keys.input.pay" = "输入您的支付私钥";
+"keys.input.address" = "输入您的地址";
+
+"recovery.alert.title" = "备份助记词，请勿截图";
+"recovery.alert.text" = "备份助记词：\n助记词用于恢复钱包，请将它准确的抄写在纸上并存放在安全的地方\n\n请勿截图，如果有人获取您的助记词将直接获取您的资产";
+
+
+"assets.list.title" = "币种资产";
+"assets.connect.ing" = "连接中";
+"assets.connect.failure" = "连接失败";
+"assets.sync.success" = "已同步";
+"assets.sync.start" = "开始同步";
+"assets.sync.progress" = "同步中";
+"assets.sync.progress.preffix" = "同步中，剩余区块：";
+"assets.sync.failure" = "同步失败";
+"assets.prefix" = "资产";
+"assets.records.nodata" = "暂无交易记录";
+
+"send.amount.remain" = "可用余额";
+"send.address" = "接收地址";
+"send.amount" = "转账金额";
+"send.fee" = "手续费";
+"send.confirm.title" = "确认转账";
+"send.confirm.pwd.title" = "请输入密码";
+"send.success" = "发送成功";
+
+"transaction.detail.title" = "交易详情";
+"transaction.id.prefix" = "交易ID：";
+"transaction.block.prefix" = "区块号：";
+"transaction.amount.prefix" = "到账金额：";
+"transaction.fee.prefix" = "手续费：";
+"transaction.direction.prefix" = "方向：";
+
+"transaction.status.success" = "转账成功";
+"transaction.status.fail" = "转账失败";
+"transaction.status.packaging" = "进行中";
+
+"receive.amount.placeholder" = "金额（选填）";
+"receive.unfold.normal" = "更多选项";
+"receive.unfold.selected" = "收起选项";
+
+
+"wallet.management.title" = "钱包管理";
+"wallet.management.inuse" = "当前使用";
+
+
+
+"password_invalid" = "不少于8位，建议混合大小写字母、数字、特殊符号";
+"confirm_password_invalid" = "两次输入的密码不一致";
+"wallet_invalid" = "钱包已存在";
+
+"copy_success" = "复制成功";
+"change_active_failure" = "切换失败";
+
+"node.add.failure" = "添加失败";
+"wallet.login.error" = "密码错误";
+
+"receive.title.suffix" = " 收款";
+"receive.address.tips" = "注意：此地址只接收$0，任何其他币种转到此地址将无法找回";
+"receive.amount.title" = "请转入 $0$1";
+
+"send.title.suffix" = "转账";
+
+"send.create.failure" = "打包失败";
+
+"address.title" = "地址簿";
+"address.add.title" = "添加地址";
+"address.validate.fail" = "地址格式错误";
+"address.empty" = "还未添加地址哦";
+
+
+"wallet.detail.name" = "钱包名称";
+"wallet.detail.pwd.tips" = "密码提示";
+"wallet.detail.import.seed" = "导出助记词";
+"wallet.detail.import.keys" = "导出私钥";
+"wallet.detail.import.error" = "导出失败";
+"wallet.detail.import.keys.tips" = "私钥未经加密，导出存在风险";
+
+
+"version.no" = "版本号";
+"about.service" = "《服务协议》";
+"about.text" = "WooKey 团队致力于提供安全、专业、可靠、易用的数字资产钱包应用，守护用户的隐私和财产自由，推动加密货币的普及与发展。";
+"blockHeight.tips" = "* 为了极大提升区块同步速度，我们强烈建议您填写区块号或近期交易时间";

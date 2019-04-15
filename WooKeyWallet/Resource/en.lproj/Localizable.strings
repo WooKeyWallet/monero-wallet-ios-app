@@ -1,0 +1,187 @@
+/* 
+  Localizable.strings
+*/
+
+// MARK: - Simple Words
+
+"next" = "Next";
+"settings" = "Settings";
+"assets" = "Assets";
+"confirm" = "Confirm";
+"cancel" = "Cancel";
+"ok" = "OK";
+"import" = "Restore";
+"verify" = "Verify";
+"copy" = "Copy";
+"send" = "Send";
+"receive" = "Receive";
+"all" = "All";
+"in" = "Receive";
+"out" = "Send";
+"success" = "Succeeded";
+"failure" = "Failed";
+"proccessing" = "Pending";
+"optional" = "Options";
+"label" = "Note";
+"token" = "Address";
+"noData" = "No Records";
+"not_recognized" = "Unable to recognize";
+"add_fail" = "Failed to Add";
+"pwdTips" = "Password Hint";
+"delete" = "Delete";
+"address" = "Address";
+"coinSelect" = "Select Asset";
+"optional" = " (Optional)";
+"none" = "None";
+"scan" = "Scan";
+"photos" = "Photos";
+
+"publicViewKey" = "Public View Key";
+"secretViewKey" = "Private View Key";
+"publicSpendKey" = "Public Spend Key";
+"secretSpendKey" = "Private Spend Key";
+"walletAddress" = "Wallet Address";
+
+"loadFail" = "Failed to Load";
+
+"language_select" = "Select Language";
+
+"failToVerify" = "Verification failed, please try again";
+
+"moreNodeAddress" = "More node addresses >>";
+
+
+// MARK: - Add Wallet
+
+"wallet.add.create" = "Create Wallet";
+"wallet.add.import" = "Restore Wallet";
+"wallet.add.slogen" = "For Privacy";
+"wallet.add.tips" = "When using WooKey Wallet you must first create a new wallet or restore an existing one.";
+"wallet.create.tip1" = "For the security and safety of your assets, please set a password used for authorization of your private key and transactions";
+"wallet.create.tip2" = "WooKey will not save your password, nor will you be able to recover the password, please keep it secure";
+"wallet.create.tip3" = "8 characters or more, a mixture of lower and upper case letters and characters and symbols is recommended.";
+"wallet.create.agreement" = "I have carefully read and agree with";
+"wallet.create.servicebook" = "Terms of Service and Privacy Policy";
+"wallet.create.name" = "Wallet Name";
+"wallet.create.pwd" = "Set Password";
+"wallet.create.pwdConfirm" = "Confirm Password";
+"wallet.create.pwdMsg" = "Password Hint (Optional)";
+"wallet.import.tokenSelect" = "Select Asset";
+"wallet.import.fromWords" = "From Mnemonic Words";
+"wallet.import.fromKeys" = "From Private Key";
+
+"settings.wallet" = "Wallet Management";
+"settings.pin" = "PIN";
+"settings.token" = "Address Book";
+"settings.node" = "Node";
+"settings.lang" = "Language";
+"settings.help" = "Contact Us";
+"settings.about" = "About WooKey";
+"settings.node.suffix" = " Node";
+
+"node.add.alert.title" = "Enter a valid node address";
+"node.delete.alert.title" = "Node deletion";
+"node.delete.alert.msg" = "Confirm to delete node $0?";
+"node.add.alert.placeholder" = "Please enter node address";
+"node.add.alert.msg" = "Current node is XMR";
+"node.verify.error" = "Node connection failure, please try again";
+
+"words.input.title" = "Mnemonic Words";
+"words.input.placeholder" = "Please enter mnemonic words and separate each word by spaces";
+"words.input.blockNum" = "Height (Optional)";
+"words.input.transDate" = "Recent Transaction Date (Optional)";
+
+"words.create.tip1" = "Backup Mnemonic Words: \nThis is for restoring your wallet, please write it down legibly and store it in a safe place.";
+"words.create.tip2" = "DO NOT screenshot, anyone with your mnemonic words can access or spend your assets.";
+"words.list.title" = "Please write down your mnemonic words";
+"words.list.confirm" = "Already Written Down";
+"words.verify.tip" = "To ensure you have written down mnemonic words correctly, please select the following words corresponding to the sequence numbers";
+"words.verify.input.title" = "Please check your mnemonic words";
+"words.verify.seed.title" = "Click the correct words corresponding to the numbers above";
+
+"keys.input.tips" = "Please enter your private key in text fields below, and pay attention to case sensitivity";
+"keys.input.look" = "Enter your private view key";
+"keys.input.pay" = "Enter your private spend key";
+"keys.input.address" = "Enter your wallet's address";
+
+"recovery.alert.title" = "Backup and DO NOT screenshot";
+"recovery.alert.text" = "Backup Mnemonic Words: \nThis is for restoring your wallet, please write it down legibly and store it in a safe place.\n\nDO NOT screenshot, anyone with your mnemonic words can access or spend your assets.";
+
+
+"assets.list.title" = "Assets";
+"assets.connect.ing" = "Connecting";
+"assets.connect.failure" = "Failed to Connect";
+"assets.sync.success" = "Synced";
+"assets.sync.start" = "Start Sync";
+"assets.sync.progress" = "Syncing";
+"assets.sync.progress.preffix" = "Syncing, blocks remaining:";
+"assets.sync.failure" = "Sync failed";
+"assets.prefix" = "Assets";
+
+"assets.records.nodata" = "No Transaction Records";
+
+"send.amount.remain" = "Available Balance";
+"send.address" = "Receive Address";
+"send.amount" = "Amount";
+"send.fee" = "Fee";
+"send.confirm.title" = "Order Confirm";
+"send.confirm.pwd.title" = "Please enter password";
+"send.success" = "Send Successfully";
+
+"transaction.detail.title" = "Transaction Details";
+"transaction.id.prefix" = "Transaction ID:";
+"transaction.block.prefix" = "Height:";
+"transaction.amount.prefix" = "Amount:";
+"transaction.fee.prefix" = "Fee:";
+"transaction.direction.prefix" = "Type:";
+
+"transaction.status.success" = "Transaction Success";
+"transaction.status.fail" = "Transaction Failure";
+"transaction.status.packaging" = "Pending";
+
+"receive.amount.placeholder" = "Amount (Optional)";
+"receive.unfold.normal" = "More Options";
+"receive.unfold.selected" = "Hide Options";
+
+
+"wallet.management.title" = "Wallet Management";
+"wallet.management.inuse" = "Online";
+
+
+
+"password_invalid" = "8 characters or more, a mixture of lower and upper case letters and characters and symbols is recommended.";
+"confirm_password_invalid" = "Passwords don’t match";
+"wallet_invalid" = "Wallet already exists";
+
+"copy_success" = "Copied";
+"change_active_failure" = "Failed to Switch";
+
+"node.add.failure" = "Failed to Add Node";
+"wallet.login.error" = "Password error";
+
+"receive.title.suffix" = " Receive";
+"receive.address.tips" = "Notice: Send only $0 to this address. Sending any other assets to this address may result in the loss of your deposit.";
+"receive.amount.title" = "Please Transfer $0$1";
+
+"send.title.suffix" = "Send";
+
+"send.create.failure" = "Failed to Package";
+
+"address.title" = "Address Book";
+"address.add.title" = "Add Address";
+"address.validate.fail" = "Address Format Error";
+"address.empty" = "No Addresses";
+
+
+"wallet.detail.name" = "Wallet Name";
+"wallet.detail.pwd.tips" = "Password Hint";
+"wallet.detail.import.seed" = "Export Mnemonic Words";
+"wallet.detail.import.keys" = "Export Private Key";
+"wallet.detail.import.error" = "Failed to Export";
+"wallet.detail.import.keys.tips" = "There is a security risk when you export private keys in an unencrypted format.";
+
+
+"version.no" = "Version";
+"about.service" = "Terms of Service";
+"about.text" = "The WooKey team develops secure, professional, reliable and simple digital asset wallet applications. We strive to protect private data and property of users. We measure success by the ease with which new and non-tech savvy users can get started using cryptocurrencies.";
+"blockHeight.tips" = "* It is highly recommended to fill Block Height or Recent Transaction Date to speed up Sync";
