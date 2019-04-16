@@ -24,9 +24,15 @@ Simple, efficient, ease of use. The easiest way to get started with cryptocurren
 - QR code Payment
 - Cross-platform Support
 
-## How To Build
+## Monero Build 
 
 https://github.com/WooKeyWallet/monero-ios-lib
+
+## Requirements
+
+- iOS 9.0+
+- Xcode 10.0+
+- Swift 4.2
 
 ## About Us
 
