@@ -90,6 +90,12 @@ class AssetsTokenViewController: BaseViewController {
     override func configureBinds() {
         super.configureBinds()
         
+        do /// Notifications
+        {
+            NotificationCenter.default.addObserver(self, selector: #selector(self.didBecomeActiveNotification), name: UIApplication.didBecomeActiveNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(self.willResignActiveNotification), name: UIApplication.willResignActiveNotification, object: nil)
+        }
+        
         do //// Actions
         {
             navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage(named: "navigationItem_refresh"), style: .plain, target: self, action: #selector(self.refreshAction))
@@ -177,6 +183,17 @@ class AssetsTokenViewController: BaseViewController {
     
     deinit {
         dPrint("\(#function) ================================= \(self.classForCoder)")
+    }
+    
+    
+    // MARK: - Methods (Notifications)
+    
+    @objc private func willResignActiveNotification() {
+        tokenAssetsView.progressBar.willDisappear()
+    }
+    
+    @objc private func didBecomeActiveNotification() {
+        tokenAssetsView.progressBar.willAppear()
     }
     
     

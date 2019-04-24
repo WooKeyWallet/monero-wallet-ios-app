@@ -287,6 +287,7 @@ class ImportFromKeysController: BaseViewController {
 extension ImportFromKeysController: UITextViewDelegate, UITextFieldDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
+        scrollView.resizeContentLayout()
         switch textView.tag {
         case 1:
             viewModel.viewKeysInput(text: textView.text)

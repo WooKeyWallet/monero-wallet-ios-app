@@ -4,6 +4,7 @@
 
 // MARK: - Simple Words
 
+"done" = "完成";
 "next" = "下一步";
 "settings" = "设置";
 "assets" = "资产";
@@ -109,7 +110,7 @@
 
 
 "assets.list.title" = "币种资产";
-"assets.connect.ing" = "连接中";
+"assets.connect.ing" = "连接中，可能需要5分钟，请稍候...";
 "assets.connect.failure" = "连接失败";
 "assets.sync.success" = "已同步";
 "assets.sync.start" = "开始同步";

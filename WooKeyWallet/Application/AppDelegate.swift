@@ -59,13 +59,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     func applicationDidEnterBackground(_ application: UIApplication) {
-//        /// get 3 min
-//        var id: UIBackgroundTaskIdentifier?
-//        id = UIApplication.shared.beginBackgroundTask {
-//            if let id = id {
-//                UIApplication.shared.endBackgroundTask(id)
-//            }
-//        }
+        AppManager.default.beginBackgroundTask()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {

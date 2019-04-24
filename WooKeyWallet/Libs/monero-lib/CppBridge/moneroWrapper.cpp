@@ -307,10 +307,11 @@ void monero_refresh() {
     }
 }
 
-void monero_store(const char* pathWithFileName) {
+bool monero_store(const char* pathWithFileName) {
     if (monero_wallet) {
-        monero_wallet->store(pathWithFileName);
+        return monero_wallet->store(pathWithFileName);
     }
+    return false;
 }
 
 bool monero_setNewPassword(const char* newPassword) {

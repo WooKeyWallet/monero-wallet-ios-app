@@ -119,7 +119,7 @@ extern "C" {
     void monero_pauseRefresh();
     void monero_stopRefresh();
     void monero_refresh();
-    void monero_store(const char* pathWithFileName);
+    bool monero_store(const char* pathWithFileName);
     bool monero_setNewPassword(const char* newPassword);
 
     // Wallet Balance

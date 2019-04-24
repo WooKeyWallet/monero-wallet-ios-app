@@ -106,6 +106,11 @@ class ReceiveViewModel: NSObject {
         inputPaymentId(id)
     }
     
+    public func showHideAddress(_ isHidden: Bool) {
+        let addr = wallet.publicAddress
+        addressState.value = !isHidden ? addr : String(addr.map({ _ in Character.init("*") }))
+    }
+    
     public func copyAddress() {
         UIPasteboard.general.string = wallet.publicAddress
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))

@@ -33,6 +33,8 @@ class AppManager: NSObject {
     
     private var pasteboardLifeTask: Task?
     
+    private var backgroundTaskIdentifier: UIBackgroundTaskIdentifier?
+    
     
     // MARK: - Properties (Closure)
     
@@ -98,6 +100,23 @@ class AppManager: NSObject {
             safariViewController.dismissButtonStyle = .close
         }
         self.rootViewController?.present(safariViewController, animated: true, completion: nil)
+    }
+    
+    public func beginBackgroundTask() {
+        endBackgroundTask()
+        /// get 3 min
+        backgroundTaskIdentifier = UIApplication.shared.beginBackgroundTask { [unowned self] in
+            self.endBackgroundTask()
+        }
+        dPrint(#function)
+    }
+    
+    public func endBackgroundTask() {
+        if let id = backgroundTaskIdentifier {
+            dPrint(#function)
+            self.backgroundTaskIdentifier = nil
+            UIApplication.shared.endBackgroundTask(id)
+        }
     }
     
     

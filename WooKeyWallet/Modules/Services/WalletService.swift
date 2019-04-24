@@ -35,7 +35,7 @@ public protocol WalletProtocol {
     
     func displayAmount(_ value: UInt64) -> String
     
-    func storeSycnhronized()
+    func storeSycnhronized() -> Bool
     
 }
 
@@ -77,7 +77,7 @@ public class WalletService {
     
     private var createdWallet: WalletProtocol?
     
-    private lazy var safeQueue = { DispatchQueue(label: "XMRWallet-Queue", qos: .default) }()
+    private lazy var safeQueue = { DispatchQueue(label: "XMRWallet-Queue", qos: .userInteractive) }()
     
     // MARK: - Methods (Public)
     

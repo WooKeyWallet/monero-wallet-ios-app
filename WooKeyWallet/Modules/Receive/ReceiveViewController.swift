@@ -66,6 +66,7 @@ class ReceiveViewController: BaseViewController {
         {
             // Btns
             receiveView.addTapGestureRecognizer(target: self, selector: #selector(self.unfoldAction(_:)))
+            receiveView.showHideAddrBtn.addTarget(self, action: #selector(self.showHideAddressAction), for: .touchUpInside)
             receiveView.copyAddressBtn.addTarget(self, action: #selector(self.copyAddressAction), for: .touchUpInside)
             receiveView.newPayIdBtn.addTarget(self, action: #selector(self.generatePaymentIdAction), for: .touchUpInside)
             receiveView.copyPayIdBtn.addTarget(self, action: #selector(self.copyPaymentIdAction), for: .touchUpInside)
@@ -111,6 +112,12 @@ class ReceiveViewController: BaseViewController {
         receiveView.unfoldBtn.isSelected = !receiveView.unfoldBtn.isSelected
         receiveView.setUnFold(receiveView.unfoldBtn.isSelected)
         scrollView.resizeContentLayout()
+    }
+    
+    @objc private func showHideAddressAction(_ sender: UIButton) {
+        sender.isSelected = !sender.isSelected
+        receiveView.addressView.isSecureTextEntry = sender.isSelected
+        viewModel.showHideAddress(sender.isSelected)
     }
     
     @objc private func copyAddressAction() {

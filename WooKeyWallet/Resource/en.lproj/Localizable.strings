@@ -4,6 +4,7 @@
 
 // MARK: - Simple Words
 
+"done" = "Done";
 "next" = "Next";
 "settings" = "Settings";
 "assets" = "Assets";
@@ -109,7 +110,7 @@
 
 
 "assets.list.title" = "Assets";
-"assets.connect.ing" = "Connecting";
+"assets.connect.ing" = "Connecting, it may take 5 minutes";
 "assets.connect.failure" = "Failed to Connect";
 "assets.sync.success" = "Synced";
 "assets.sync.start" = "Start Sync";

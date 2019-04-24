@@ -125,9 +125,8 @@ extension XMRWallet {
         return self.getUpdatedHistory()
     }
     
-    public func storeSycnhronized() {
-        monero_store(self.pathWithFileName())
-        print(#function)
+    public func storeSycnhronized() -> Bool {
+        return monero_store(self.pathWithFileName())
     }
 
     public func generatePaymentId() -> String {

@@ -4,21 +4,26 @@
 
 import UIKit
 
+private struct LProjPath {
+    static let zh_Hans = { Bundle.main.path(forResource: "zh-Hans", ofType: "lproj") }()
+    static let en = { Bundle.main.path(forResource: "en", ofType: "lproj") }()
+}
+
 public func LocalizedString(key: String, comment: String) -> String {
-    let forResource: String
+    let path: String?
     switch AppLanguage.manager.current {
     case .zh:
-        forResource = "zh-Hans"
-    default:
-        forResource = "en"
+        path = LProjPath.zh_Hans
+    case .en:
+        path = LProjPath.en
     }
     guard
-        let path = Bundle.main.path(forResource: forResource, ofType: "lproj"),
-        let localizedString = Bundle.init(path: path)?.localizedString(forKey: key, value: "", table: nil)
-        else {
-            return comment
+        let _path = path,
+        let bundle = Bundle.init(path: _path)
+    else {
+        return comment
     }
-    return localizedString
+    return bundle.localizedString(forKey: key, value: "", table: nil)
 }
 
 class AppLanguage: NSObject {

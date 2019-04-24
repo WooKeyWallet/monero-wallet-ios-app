@@ -46,6 +46,7 @@ class ReceiveView: UIView {
         let textView = createTextView()
         textView.font = AppTheme.Font.text_smaller
         textView.isEditable = false
+        textView.delegate = self
         return textView
     }()
     
@@ -94,6 +95,12 @@ class ReceiveView: UIView {
         btn.setTitleColor(AppTheme.Color.text_light, for: .normal)
         btn.titleLabel?.font = AppTheme.Font.text_small
         btn.isUserInteractionEnabled = false
+        return btn
+    }()
+    
+    public lazy var showHideAddrBtn: UIButton = {
+        let btn = createIconBtn(icon: UIImage(named: "receive_address_show"))
+        btn.setImage(UIImage(named: "receive_address_hidden"), for: .selected)
         return btn
     }()
     
@@ -150,6 +157,7 @@ class ReceiveView: UIView {
         sepratorView,
         addressView,
         addressTipLabel,
+        showHideAddrBtn,
         copyAddressBtn,
         
 //        amountField,
@@ -218,6 +226,11 @@ class ReceiveView: UIView {
         copyAddressBtn.snp.makeConstraints { (make) in
             make.size.equalTo(32)
             make.right.bottom.equalTo(addressView)
+        }
+        showHideAddrBtn.snp.makeConstraints { (make) in
+            make.size.equalTo(32)
+            make.right.equalTo(copyAddressBtn.snp.left).offset(-5)
+            make.bottom.equalTo(copyAddressBtn)
         }
         
 //        amountField.snp.makeConstraints { (make) in
@@ -312,5 +325,15 @@ class ReceiveView: UIView {
         }
         
         self.layoutIfNeeded()
+    }
+    
+}
+
+// MARK: -
+
+extension ReceiveView: UITextViewDelegate {
+    
+    func textViewShouldBeginEditing(_ textView: UITextView) -> Bool {
+        return !textView.isSecureTextEntry
     }
 }

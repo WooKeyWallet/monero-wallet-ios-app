@@ -36,7 +36,8 @@ class AssetsTokenViewModel: NSObject {
     
     private var init_success = false
     private var listening = false
-    
+    private var needSynchronized = true
+    private var isStoreSynced: Bool?
     
     // MARK: - Life Cycle
     
@@ -55,10 +56,7 @@ class AssetsTokenViewModel: NSObject {
             do {
                 strongSelf.wallet = try WalletService.shared.loginWallet(strongSelf._wallet.label, password: strongSelf.pwd)
                 strongSelf.init_success = true
-                WalletService.shared.safeOperation({ [weak self] in
-                    guard let strongSelf = self else { return }
-                    strongSelf.connect()
-                })
+                strongSelf.connect()
             } catch {
                 DispatchQueue.main.async {
                     strongSelf.refreshState.value = true
@@ -77,7 +75,8 @@ class AssetsTokenViewModel: NSObject {
                 self.statusTextState.value = LocalizedString(key: "assets.connect.ing", comment: "")
             }
         }
-        WalletService.shared.safeOperation { [weak self] in
+        WalletService.shared.safeOperation {
+        [weak self] in
             guard let strongSelf = self else { return }
             let success = strongSelf.wallet.connectToDaemon(address: WalletDefaults.shared.node, upperTransactionSizeLimit: 0, daemonUsername: "", daemonPassword: "")
             if success {
@@ -96,51 +95,50 @@ class AssetsTokenViewModel: NSObject {
     private func listen() {
         weak var weakSelf = self
         var startListeningTime = CFAbsoluteTimeGetCurrent()
+        let syncingPreffix = LocalizedString(key: "assets.sync.progress.preffix", comment: "")
         wallet.setListener(listenerHandler: {
-            guard let strongSelf = weakSelf else { return }
-            let walletIsSynced = strongSelf.wallet.synchronized
-            if walletIsSynced {
-                DispatchQueue.main.async {
-                    if strongSelf.conncetingState.value {
-                        strongSelf.conncetingState.value = false
-                    }
-                    strongSelf.synchronizedUI()
+            guard let strongSelf = weakSelf, strongSelf.wallet.synchronized else { return }
+            dPrint("refreshed -----------------------------------> \(monero_getBlockchainHeight())---\(monero_getDaemonBlockChainHeight())")
+            if strongSelf.needSynchronized {
+                WalletService.shared.safeOperation({
+                    guard let strongSelf = weakSelf else { return }
+                    strongSelf.isStoreSynced = strongSelf.wallet.storeSycnhronized()
+                })
+            }
+            strongSelf.storeToDB()
+            strongSelf.needSynchronized = false
+            DispatchQueue.main.async {
+                if strongSelf.conncetingState.value {
+                    strongSelf.conncetingState.value = false
                 }
+                strongSelf.synchronizedUI()
             }
             strongSelf.postData()
         }) { (current, total) in
             guard let strongSelf = weakSelf else { return }
-            dPrint("currentHeight======================================\(current)---\(total)")
-            dPrint("restoreHeight======================================\(strongSelf.wallet.restoreHeight)")
+            dPrint("newBlock --------------------------------------------> \(current)---\(total)")
             let currenTime = CFAbsoluteTimeGetCurrent()
+            let leftHeight = total - current
+            strongSelf.needSynchronized = leftHeight < 1000
             guard currenTime - startListeningTime >= 1 else {
                 startListeningTime = currenTime
                 return
             }
             startListeningTime = currenTime
-            let progress = CGFloat(current)/CGFloat(total)
-            let walletIsSynced = strongSelf.wallet.synchronized
+            var progress = CGFloat(current)/CGFloat(total)
             let leftBlocks: String
-            if total <= current {
+            if leftHeight <= 1 {
                 leftBlocks = "1"
+                progress = 1
             } else {
-                leftBlocks = String(total - current)
+                leftBlocks = String(leftHeight)
             }
             DispatchQueue.main.async {
                 if strongSelf.conncetingState.value {
                     strongSelf.conncetingState.value = false
                 }
-                if walletIsSynced {
-                    strongSelf.synchronizedUI()
-                    WalletService.shared.safeOperation({
-                        guard let strongSelf = weakSelf else { return }
-                        strongSelf.wallet.storeSycnhronized()
-                    })
-                    strongSelf.postData()
-                } else {
-                    strongSelf.progressState.value = progress
-                    strongSelf.statusTextState.value = LocalizedString(key: "assets.sync.progress.preffix", comment: "") + leftBlocks
-                }
+                strongSelf.progressState.value = progress
+                strongSelf.statusTextState.value = syncingPreffix + leftBlocks
             }
         }
         self.listening = true
@@ -157,7 +155,9 @@ class AssetsTokenViewModel: NSObject {
     func refresh() {
         refreshState.value = false
         if listening {
-            sycn()
+            WalletService.shared.safeOperation {
+                self.sycn()
+            }
         } else if init_success {
             connect()
         } else {
@@ -171,21 +171,28 @@ class AssetsTokenViewModel: NSObject {
         statusTextState.value = LocalizedString(key: "assets.sync.success", comment: "")
     }
     
-    private func postData() {
+    private func storeToDB() {
+        let (balance, wallet_id, asset_id) = (self.wallet.balance, self._wallet.id, self.asset.id)
         DispatchQueue.global().async {
-            let balance = self.wallet.balance
             /// 写入数据库
             let updateWallet = Wallet.init()
             updateWallet.balance = balance
-            _ = DBService.shared.updateWallet(on: [Wallet.Properties.balance], with: updateWallet, condition: Wallet.Properties.id.is(self._wallet.id))
+            _ = DBService.shared.updateWallet(on: [Wallet.Properties.balance], with: updateWallet, condition: Wallet.Properties.id.is(wallet_id))
             let asset_update = Asset()
             asset_update.balance = balance
-            if DBService.shared.update(on: [Asset.Properties.balance], with: asset_update, condition: Asset.Properties.id.is(self.asset.id)) {
+            if DBService.shared.update(on: [Asset.Properties.balance], with: asset_update, condition: Asset.Properties.id.is(asset_id)) {
                 DispatchQueue.main.async {
                     WalletService.shared.assetRefreshState.value = 1
                 }
             }
-            
+        }
+    }
+    
+    private func postData() {
+        DispatchQueue.global().async {
+        [weak self] in
+            guard let `self` = self else { return }
+            let balance = self.wallet.balance
             /// 数据转换
             var allData = [TableViewSection()]
             var inData = [TableViewSection()]
@@ -267,11 +274,18 @@ class AssetsTokenViewModel: NSObject {
         dPrint("\(#function) ================================= \(self.classForCoder)")
         guard let wallet = self.wallet else { return }
         let isRefreshing = self.listening
+        let isStoreSynced = self.isStoreSynced
         WalletService.shared.safeOperation {
             if isRefreshing {
                 wallet.pasueRefresh()
             }
-            wallet.lock()
+            if let _ = isStoreSynced {
+                if wallet.storeSycnhronized() {
+                    wallet.lock()
+                }
+            } else {
+                wallet.lock()
+            }
         }
     }
     

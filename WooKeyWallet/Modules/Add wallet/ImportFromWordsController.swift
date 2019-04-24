@@ -193,6 +193,7 @@ class ImportFromWordsController: BaseViewController {
 extension ImportFromWordsController: UITextViewDelegate, UITextFieldDelegate {
     
     func textViewDidChange(_ textView: UITextView) {
+        scrollView.resizeContentLayout()
         viewModel.seedInput(text: textView.text)
     }
     
