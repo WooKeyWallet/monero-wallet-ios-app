@@ -63,7 +63,7 @@ class TransactionListController: BaseTableViewController {
     }
     
     func reloadData() {
-        tableViewPlaceholder.state = dataSource.count > 0 ? .none : .withoutData
+        tableViewPlaceholder.state = (dataSource.first?.rows.count ?? 0) > 0 ? .none : .withoutData
         tableView.reloadData()
     }
     

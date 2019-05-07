@@ -197,3 +197,28 @@ extension UIView {
         layer.addSublayer(shapeLayer)
     }
 }
+
+// MARK: - Find View
+
+extension UIView {
+    
+    func findView(_ filter: (UIView) -> Bool) -> UIView? {
+        if filter(self) {
+            return self
+        } else {
+            var resultView: UIView?
+            for subview in subviews {
+                if filter(subview) {
+                    resultView = subview
+                    break
+                } else {
+                    if let result = subview.findView(filter) {
+                        resultView = result
+                        break
+                    }
+                }
+            }
+            return resultView
+        }
+    }
+}

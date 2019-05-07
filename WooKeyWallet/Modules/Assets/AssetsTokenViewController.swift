@@ -17,16 +17,19 @@ class AssetsTokenViewController: BaseViewController {
     // MARK: - Properties (Lazy)
 
     
-    private lazy var contentView: AutoLayoutScrollView = {
-        return AutoLayoutScrollView(frame: view.bounds)
+    private lazy var contentView = {
+        AutoLayoutScrollView(frame: view.bounds)
     }()
     
-    private lazy var tokenAssetsView: AssetsTokenView = {
-        return AssetsTokenView()
+    private lazy var tokenAssetsView = {
+        AssetsTokenView()
+    }()
+    
+    private lazy var viewControllers = {
+        Array<TransactionsType>([.all, .in, .out]).map({ TransactionListController.init(type: $0) })
     }()
     
     private lazy var tokenTransactionsView: CAPSPageMenu = {
-        let viewControllers = Array<TransactionsType>([.all, .in, .out]).map({ TransactionListController.init(type: $0) })
         let _frame = view.frame.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: UIApplication.shared.statusBarFrame.height + 44, right: 0))
         return CAPSPageMenu.init(viewControllers: viewControllers, frame: _frame, pageMenuOptions: CAPSPageMenuOption.itemsScaleToFillOptions())
     }()
@@ -81,9 +84,7 @@ class AssetsTokenViewController: BaseViewController {
                 make.height.equalTo(tokenTransactionsView.view.height)
             }
             
-            
             contentView.resizeContentLayout()
-            
         }
     }
     
@@ -98,21 +99,20 @@ class AssetsTokenViewController: BaseViewController {
         
         do //// Actions
         {
-            navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage(named: "navigationItem_refresh"), style: .plain, target: self, action: #selector(self.refreshAction))
+            navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage(named: "navigation_node_switch"), style: .plain, target: self, action: #selector(self.refreshAction))
             tokenAssetsView.sendBtn.addTarget(self, action: #selector(self.sendAction), for: .touchUpInside)
             tokenAssetsView.receiveBtn.addTarget(self, action: #selector(self.receiveAction), for: .touchUpInside)
             tokenAssetsView.copyBtn.addTarget(self, action: #selector(self.copyAction), for: .touchUpInside)
             
             /// 叠加视图滑动联动
-            tokenTransactionsView.controllerArray.forEach({
-                guard let vc = $0 as? TransactionListController else { return }
+            viewControllers.forEach({
                 // 子级结束，进入父级
-                vc.isScrollEND.observe(self, eventHandler: { (isEnd, strongSelf) in
+                $0.isScrollEND.observe(self, eventHandler: { (isEnd, strongSelf) in
                     guard isEnd else { return }
                     strongSelf.isScrollEND.value = false
                 })
                 // 父级结束，进入子级
-                self.isScrollEND.observe(vc, eventHandler: { (isEnd, strongVC) in
+                self.isScrollEND.observe($0, eventHandler: { (isEnd, strongVC) in
                     guard isEnd else { return }
                     strongVC.isScrollEND.value = false
                 })
@@ -121,9 +121,9 @@ class AssetsTokenViewController: BaseViewController {
         
         do //// Wallet Syncing
         {
-            viewModel.refreshState.observe(navigationItem.rightBarButtonItem!) { (enable, rightBarButtonItem) in
-                rightBarButtonItem.isEnabled = enable
-            }
+//            viewModel.refreshState.observe(navigationItem.rightBarButtonItem!) { (enable, rightBarButtonItem) in
+//                rightBarButtonItem.isEnabled = enable
+//            }
             viewModel.sendState.observe(tokenAssetsView.sendBtn) { (enable, btn) in
                 btn.isEnabled = enable
             }
@@ -143,23 +143,10 @@ class AssetsTokenViewController: BaseViewController {
                 label.text = text
             }
             viewModel.historyState.observe(self) { (list, strongSelf) in
-                guard let list = list else { return }
-                let vc0 = strongSelf.tokenTransactionsView.controllerArray[0] as? TransactionListController
-                let vc1 = strongSelf.tokenTransactionsView.controllerArray[1] as? TransactionListController
-                let vc2 = strongSelf.tokenTransactionsView.controllerArray[2] as? TransactionListController
-                vc0?.dataSource = list[0]
-                vc1?.dataSource = list[1]
-                vc2?.dataSource = list[2]
-                switch strongSelf.tokenTransactionsView.currentPageIndex {
-                case 0:
-                    vc0?.reloadData()
-                case 1:
-                    vc1?.reloadData()
-                case 2:
-                    vc2?.reloadData()
-                default:
-                    break;
-                }
+                stride(from: 0, to: list.count, by: 1).forEach({
+                    strongSelf.viewControllers[$0].dataSource = list[$0]
+                })
+                strongSelf.viewControllers[strongSelf.tokenTransactionsView.currentPageIndex].reloadData()
             }
             
             viewModel.init_wallet()
@@ -200,7 +187,7 @@ class AssetsTokenViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func refreshAction() {
-        viewModel.refresh()
+        navigationController?.pushViewController(viewModel.toSwitchNode(), animated: true)
     }
     
     @objc private func sendAction() {

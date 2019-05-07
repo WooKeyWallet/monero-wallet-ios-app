@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		821F01842281395A00A14EBC /* TokenWalletDeleteCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 821F01832281395A00A14EBC /* TokenWalletDeleteCell.swift */; };
 		822627D1224094FD0013D1C5 /* ContactUsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822627D0224094FD0013D1C5 /* ContactUsViewController.swift */; };
 		8226281F224390A60013D1C5 /* libboost.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 82262813224390A50013D1C5 /* libboost.a */; };
 		82262820224390A60013D1C5 /* libcrypto.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 82262815224390A50013D1C5 /* libcrypto.a */; };
@@ -194,6 +195,7 @@
 		1A25CB7E300F36CBCF222647 /* Pods_Wookey.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Wookey.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		27FDF1D394F40908FA9D4574 /* Pods_WooKeyWallet.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WooKeyWallet.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7B223D24C9956670D33E498C /* Pods_WookeyUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WookeyUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		821F01832281395A00A14EBC /* TokenWalletDeleteCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TokenWalletDeleteCell.swift; sourceTree = "<group>"; };
 		822627D0224094FD0013D1C5 /* ContactUsViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactUsViewController.swift; sourceTree = "<group>"; };
 		82262811224390090013D1C5 /* wallet2_api.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = wallet2_api.h; sourceTree = "<group>"; };
 		82262813224390A50013D1C5 /* libboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libboost.a; sourceTree = "<group>"; };
@@ -1023,6 +1025,7 @@
 		98B4F01022153C6000AEB9E6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				821F01832281395A00A14EBC /* TokenWalletDeleteCell.swift */,
 				98B4F01522153EE500AEB9E6 /* TokenWalletViewCell.swift */,
 				989B4094222D06B800A174C8 /* TokenWalletDeailHeader.swift */,
 				989B4096222D0C3200A174C8 /* TokenWalletDetailViewCell.swift */,
@@ -1388,6 +1391,7 @@
 				98F1FA9321ED7B140018C10B /* AssetsViewController.swift in Sources */,
 				9824376521E5D77300AB389E /* NavigationController.swift in Sources */,
 				9842A68A222790C20055ABE5 /* LBXScanViewController.swift in Sources */,
+				821F01842281395A00A14EBC /* TokenWalletDeleteCell.swift in Sources */,
 				9824378721E5D7AE00AB389E /* UIBarButtonItem + Ext.swift in Sources */,
 				98483890220038560085C87B /* TransactionListController.swift in Sources */,
 				989B408F222D02C400A174C8 /* TokenWalletDetailViewController.swift in Sources */,

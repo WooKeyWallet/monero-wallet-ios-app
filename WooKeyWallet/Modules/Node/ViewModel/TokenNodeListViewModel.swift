@@ -7,20 +7,26 @@ import Alamofire
 
 class TokenNodeListViewModel: NSObject {
     
+    typealias NextAction = (String) -> Void
+    
     // MARK: - Properties (Observable)
     
-    public lazy var dataSourceOb = { Observable<[TableViewSection]>([]) }()
+    public lazy var dataSourceOb = { Postable<[TableViewSection]>() }()
     public lazy var reloadIndexPathState = { Postable<TableViewRow>() }()
     
     
     // MARK: - Properties (Private)
     
     private let tokenNode: TokenNodeModel
+    
+    private let nextAction: NextAction?
+    
     private var nodeList = [NodeOption]() {
         didSet {
             postDataSource()
         }
     }
+    
     private var selectedIndex: Int?
     
     private var fpsCaches = [String: Int]()
@@ -28,16 +34,13 @@ class TokenNodeListViewModel: NSObject {
     private lazy var fpsQueue = { DispatchQueue.init(label: "node.fps.flow") }()
     
     private lazy var defaultNodes = {
-        [
-            NodeDefaults.Monero.default,
-            NodeDefaults.Monero.default0,
-            NodeDefaults.Monero.default1,
-        ]
+        NodeDefaults.Monero.defaultList
     }()
     
     // MARK: - Life Cycles
     
-    required init(tokenNode: TokenNodeModel) {
+    required init(tokenNode: TokenNodeModel, nextAction: NextAction? = nil) {
+        self.nextAction = nextAction
         self.tokenNode = tokenNode
         super.init()
     }
@@ -53,7 +56,7 @@ class TokenNodeListViewModel: NSObject {
                 return TableViewRow.init(model, cellType: TokenNodeListCell.self, rowHeight: 62)
             }))]
             DispatchQueue.main.async {
-                self.dataSourceOb.value = sections
+                self.dataSourceOb.newState(sections)
             }
         }
     }
@@ -122,11 +125,15 @@ class TokenNodeListViewModel: NSObject {
             if let node_list = DBService.shared.getNodeList(), node_list.count > 0 {
                 stride(from: 0, to: node_list.count, by: 1).forEach { (i) in
                     let node = node_list[i]
-                    if node.isSelected {
-                        _nodeList[0].isSelected = false
-                        self.selectedIndex = i + self.defaultNodes.count
+                    if self.defaultNodes.contains(node.url) {
+                        _=DBService.shared.deleteNode(node.url)
+                    } else {
+                        if node.isSelected {
+                            _nodeList[0].isSelected = false
+                            self.selectedIndex = i + self.defaultNodes.count
+                        }
+                        _nodeList.append(NodeOption.init(node: node.url, fps: nil, isSelected: node.isSelected))
                     }
-                    _nodeList.append(NodeOption.init(node: node.url, fps: nil, isSelected: node.isSelected))
                 }
             }
             DispatchQueue.main.async {
@@ -153,15 +160,19 @@ class TokenNodeListViewModel: NSObject {
                 _ = DBService.shared.update(on: [Node.Properties.isSelected], with: node, condition: Node.Properties.url.is(nodeList[index].node))
             }
         }
+        
         selectedIndex = indexPath.row
+        let selectedNode = nodeList[indexPath.row].node
         self.nodeList = nodeList
         
-        WalletDefaults.shared.node = nodeList[indexPath.row].node
+        WalletDefaults.shared.node = selectedNode
         if selectedIndex! >= defaultNodes.count {
             let node = Node()
             node.isSelected = true
             _ = DBService.shared.update(on: [Node.Properties.isSelected], with: node, condition: Node.Properties.url.is(WalletDefaults.shared.node))
         }
+        
+        nextAction?(selectedNode)
     }
     
     public func toAddNodeViewController() -> UIViewController {
@@ -207,8 +218,8 @@ class TokenNodeListViewModel: NSObject {
         let deleteNode = _nodeList.remove(at: indexPath.row)
         AppManager.default.rootViewController?.showAlert(LocalizedString(key: "node.delete.alert.title", comment: ""),
                        message: LocalizedString(key: "node.delete.alert.msg", comment: "").replacingOccurrences(of: "$0", with: deleteNode.node),
-                       cancelTitle: "cancel",
-                       doneTitle: "confirm",
+                       cancelTitle: LocalizedString(key: "cancel", comment: ""),
+                       doneTitle: LocalizedString(key: "confirm", comment: ""),
                        doneClousre: {
                         [unowned self] in
                         if deleteNode.isSelected {

@@ -72,6 +72,7 @@ class CreateWalletViewModel: NSObject {
         } else {
             self.nameTextState.value = self.create.name ?? ""
         }
+        self.nameErrorState.value = nil
         self.nextState.value = isVaildNext()
     }
     

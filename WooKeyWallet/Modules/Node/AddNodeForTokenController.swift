@@ -77,6 +77,11 @@ class AddNodeForTokenController: BaseViewController {
         contentView.confirmBtn.addTarget(self, action: #selector(self.confirmAction), for: .touchUpInside)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        textView.becomeFirstResponder()
+    }
+    
     
     // MARK: - Methods (Action)
     

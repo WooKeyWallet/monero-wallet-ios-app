@@ -21,6 +21,50 @@ struct Transaction {
     var paymentId: String = ""
     var hash: String = ""
     var block: String = ""
+    
+    init(type: TransactionsType,
+        amount: String,
+        status: Transaction.Status,
+        token: String,
+        date: String,
+        fee: String,
+        paymentId: String,
+        hash: String,
+        block: String)
+    {
+        self.type = type
+        self.amount = amount
+        self.status = status
+        self.token = token
+        self.date = date
+        self.fee = fee
+        self.paymentId = paymentId
+        self.hash = hash
+        self.block = block
+    }
+    
+    init(item: TransactionItem) {
+        self.amount = item.amount
+        self.token = item.token
+        self.date = Date.init(timeIntervalSince1970: Double(item.timestamp)).toString("yyyy-MM-dd HH:mm:ss")
+        self.fee = item.networkFee
+        self.paymentId = item.paymentId
+        self.hash = item.hash
+        self.block = String(item.blockHeight)
+        if item.isFailed {
+            self.status = .failure
+        } else if item.isPending {
+            self.status = .proccessing
+        } else {
+            self.status = .success
+        }
+        switch item.direction {
+        case .received:
+            self.type = .in
+        case .sent:
+            self.type = .out
+        }
+    }
 }
 
 struct TransactionListCellFrame {

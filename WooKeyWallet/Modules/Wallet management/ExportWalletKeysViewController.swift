@@ -258,9 +258,7 @@ class ExportWalletKeysViewController: BaseViewController {
                     self.addressField.text = address
                     self.scrollView.resizeContentLayout()
                 }
-                WalletService.shared.safeOperation({
-                    wallet.lock()
-                })
+                wallet.lock()
             } catch {
                 DispatchQueue.main.async {
                     HUD.hideHUD()

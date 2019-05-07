@@ -18,6 +18,7 @@ public struct TransactionItem {
     public let hash: String
     public let label: String
     public let blockHeight: UInt64
+    public let token: String
     
     public init(direction: TransactionDirection,
                 isPending: Bool,
@@ -42,71 +43,37 @@ public struct TransactionItem {
         self.hash = hash
         self.label = label
         self.blockHeight = blockHeight
+        self.token = "XMR"
     }
-    
-//    public func readableAmountWithNetworkFee() -> String {
-//        var totalInAtomicUnits: UInt64
-//        if self.isPending {
-//            // as long as trx is pending the amount contains the network fee
-//            totalInAtomicUnits = xmr_displayAmount(self.amount)
-//        } else {
-//            // when no longer pending then the total amount spent is the sum of amount and network fee
-//            totalInAtomicUnits = xmr_displayAmount(self.amount + self.networkFee)
-//        }
-//
-//        let floatAmount: Double = Double(totalInAtomicUnits) / 1e12
-//        return String(format: "%0.05f", floatAmount)
-//    }
-//
-//    private func readableAmount() -> String {
-//        let floatAmount: Double = Double(self.amount) / 1e12
-//        return String(format: "%0.05f", floatAmount)
-//    }
-//
-//    private func readableNetworkFee() -> String {
-//        let floatNetworkFee: Double = Double(self.networkFee) / 1e12
-//        return String(format: "%0.05f", floatNetworkFee)
-//    }
-//    
-//    public func readableTimestamp() -> String {
-//        let date = Date(timeIntervalSince1970: Double(timestamp))
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.locale = NSLocale.current
-//        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm" //Specify your format that you want
-//        return dateFormatter.string(from: date)
-//    }
-    
-//    public func toString() -> String {
-//        var result = ""
-//        result.append("\(self.readableTimestamp())\t")
-//        result.append("\(self.readableAmountWithNetworkFee())\t")
-//        result.append("\(self.readableAmount())\t")
-//        result.append("\(self.readableNetworkFee())\t")
-//        result.append("\(self.direction)\t")
-//        result.append("confirmations: \(self.confirmations)\t")
-//        result.append("pending:\(self.isPending)\t")
-//        result.append("failed:\(self.isFailed)\t")
-//        return result
-//    }
 }
 
 
 public class TransactionHistory {
     
-    public var all: [TransactionItem]
+    public typealias ItemList = [TransactionItem]
     
-    public init() {
-        self.all = [TransactionItem]()
+    private var value: (all: ItemList, send: ItemList, receive: ItemList)
+    
+    public var all: ItemList {
+        get { return value.all }
+    }
+    public var send: ItemList {
+        get { return value.send }
+    }
+    public var receive: ItemList {
+        get { return value.receive }
     }
     
-//    public func toString() -> String {
-//        var result = "\n\t\t"
-//        
-//        for transactionItem in all {
-//            result.append(transactionItem.toString())
-//            result.append("\n\t\t")
-//        }
-//        
-//        return result
-//    }
+    public init(_ items: ItemList) {
+        self.value = (items, [], [])
+        for item in items {
+            switch item.direction {
+            case .sent:
+                self.value.send.append(item)
+            case .received:
+                self.value.receive.append(item)
+            }
+        }
+    }
+    
 }

@@ -69,8 +69,8 @@ open class ZZDatePicker: UIViewController {
         view.addSubview(self.box)
         
         // Topline
-        let line = UIView.init(frame: CGRect(x: 0, y: 0, width: box.bounds.size.width, height: 1/UIScreen.main.scale))
-        line.backgroundColor = AppTheme.Color.cell_line
+        let line = UIView.init(frame: CGRect(x: 0, y: 0, width: box.bounds.size.width, height: 1 / UIScreen.main.scale))
+        line.backgroundColor = UIColor.black
         box.addSubview(line)
         
         // ToolBar
@@ -85,7 +85,7 @@ open class ZZDatePicker: UIViewController {
         [cancelItem, doneItem].forEach({
             $0.setTitleTextAttributes([
                 NSAttributedString.Key.foregroundColor: mode.toolBarTintColor,
-                NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 17)
+                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 17, weight: .medium)
                 ], for: .normal)
             var highlightedColor: UIColor
             let colorCompoents = mode.toolBarTintColor.cgColor.components ?? []

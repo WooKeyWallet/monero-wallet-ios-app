@@ -53,10 +53,17 @@ class ImportWalletViewController: BaseViewController {
         /// ViewModel -> View
         
         viewModel.showDatePickerState.observe(self) { (picker, strongSelf) in
-            guard let picker = picker else { return }
-            strongSelf.definesPresentationContext = true
-            picker.modalPresentationStyle = .overCurrentContext
-            strongSelf.present(picker, animated: false, completion: nil)
+            DispatchQueue.main.async {
+                strongSelf.definesPresentationContext = true
+                picker.modalPresentationStyle = .overCurrentContext
+                strongSelf.present(picker, animated: false, completion: nil)
+            }
+        }
+        
+        viewModel.showAlertState.observe(self) { (alert, strongSelf) in
+            DispatchQueue.main.async {
+                strongSelf.present(alert, animated: true, completion: nil)
+            }
         }
         
     }

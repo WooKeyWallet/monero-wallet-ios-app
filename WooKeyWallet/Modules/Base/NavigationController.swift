@@ -65,7 +65,6 @@ class NavigationController: UINavigationController {
             [weak self] () -> Void in
             guard let strongSelf = self else { return }
             strongSelf.view.backgroundColor = UIColor.white
-            strongSelf.navigationBar.shadowImage = UIImage()
             strongSelf.navigationBar.tintColor = AppTheme.Color.navigation_tintColor
             strongSelf.navigationBar.backgroundColor = UIColor.clear
             strongSelf.navigationBar.titleTextAttributes = [
@@ -75,6 +74,7 @@ class NavigationController: UINavigationController {
             strongSelf.navigationBar.isTranslucent = true
             strongSelf.interactivePopGestureRecognizer?.delegate = strongSelf
             strongSelf.delegate = strongSelf
+            strongSelf.hideBottomLine()
         }
         self_viewDidLoad()
     }
@@ -95,6 +95,11 @@ class NavigationController: UINavigationController {
         super.pushViewController(viewController, animated: animated)
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+    }
+    
     // MARK: - Actions
     
     @objc private func popAction() {
@@ -108,6 +113,16 @@ class NavigationController: UINavigationController {
     // MARK: - Methods (Public)
     
     
+    // MARK: - Methods (Private)
+    
+    private func hideBottomLine() {
+        if #available(iOS 11.0, *) {
+            navigationBar.shadowImage = UIImage()
+        } else {
+            let bottomLine = navigationBar.findView({ $0.height <= 1 })
+            bottomLine?.isHidden = true
+        }
+    }
     
 }
 

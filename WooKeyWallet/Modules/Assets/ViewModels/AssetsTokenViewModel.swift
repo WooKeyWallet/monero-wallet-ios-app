@@ -16,7 +16,7 @@ class AssetsTokenViewModel: NSObject {
     
     lazy var balanceState = { return Observable<String>(asset.remain) }()
     
-    lazy var historyState = { return Observable<[[TableViewSection]]?>(nil) }()
+    lazy var historyState = { return Postable<[[TableViewSection]]>() }()
     
     
     lazy var sendState = { return Observable<Bool>(false) }()
@@ -49,6 +49,7 @@ class AssetsTokenViewModel: NSObject {
     }
     
     func init_wallet() {
+        closeWallet()
         conncetingState.value = true
         statusTextState.value = LocalizedString(key: "assets.connect.ing", comment: "")
         WalletService.shared.safeOperation { [weak self] in
@@ -65,6 +66,32 @@ class AssetsTokenViewModel: NSObject {
                 }
             }
         }
+        loadHistoryFromDB()
+    }
+    
+    private func loadHistoryFromDB() {
+        DispatchQueue.global().async {
+            guard
+                let all = DBService.shared.getTransactionList(condition: _Transaction_.Properties.walletId.is(self._wallet.id))
+            else {
+                return
+            }
+            /// 数据转换
+            let itemMapToRow = { (item: Transaction) -> TableViewRow in
+                var row = TransactionListCellFrame.toTableViewRow(item)
+                row.didSelectedAction = {
+                    [unowned self] _ in
+                    self.pushToTransaction(item)
+                }
+                return row
+            }
+            let allData = [TableViewSection(all.map(itemMapToRow))]
+            let receiveData = [TableViewSection(all.filter({ $0.type == .in }).map(itemMapToRow))]
+            let sendData = [TableViewSection(all.filter({ $0.type == .out }).map(itemMapToRow))]
+            DispatchQueue.main.async {
+                self.historyState.newState([allData, receiveData, sendData])
+            }
+        }
     }
     
     private func connect() {
@@ -75,12 +102,15 @@ class AssetsTokenViewModel: NSObject {
                 self.statusTextState.value = LocalizedString(key: "assets.connect.ing", comment: "")
             }
         }
-        WalletService.shared.safeOperation {
+        DispatchQueue.global(qos: .userInteractive).async {
         [weak self] in
             guard let strongSelf = self else { return }
             let success = strongSelf.wallet.connectToDaemon(address: WalletDefaults.shared.node, upperTransactionSizeLimit: 0, daemonUsername: "", daemonPassword: "")
             if success {
-                strongSelf.listen()
+                WalletService.shared.safeOperation({
+                    guard let strongSelf = self else { return }
+                    strongSelf.listen()
+                })
             } else {
                 DispatchQueue.main.async {
                     guard let strongSelf = self else { return }
@@ -104,22 +134,26 @@ class AssetsTokenViewModel: NSObject {
                     guard let strongSelf = weakSelf else { return }
                     strongSelf.isStoreSynced = strongSelf.wallet.storeSycnhronized()
                 })
+                strongSelf.needSynchronized = false
             }
-            strongSelf.storeToDB()
-            strongSelf.needSynchronized = false
             DispatchQueue.main.async {
                 if strongSelf.conncetingState.value {
                     strongSelf.conncetingState.value = false
                 }
                 strongSelf.synchronizedUI()
             }
-            strongSelf.postData()
+            DispatchQueue.global(qos: .userInteractive).async {
+                guard let strongSelf = weakSelf else { return }
+                let (balance, history) = (strongSelf.wallet.balance, strongSelf.wallet.history)
+                strongSelf.storeToDB(balance: balance, history: history)
+                strongSelf.postData(balance: balance, history: history)
+            }
         }) { (current, total) in
             guard let strongSelf = weakSelf else { return }
             dPrint("newBlock --------------------------------------------> \(current)---\(total)")
             let currenTime = CFAbsoluteTimeGetCurrent()
-            let leftHeight = total - current
-            strongSelf.needSynchronized = leftHeight < 1000
+            let difference = total.subtractingReportingOverflow(current)
+            strongSelf.needSynchronized = difference.overflow || difference.partialValue < 1000
             guard currenTime - startListeningTime >= 1 else {
                 startListeningTime = currenTime
                 return
@@ -127,11 +161,11 @@ class AssetsTokenViewModel: NSObject {
             startListeningTime = currenTime
             var progress = CGFloat(current)/CGFloat(total)
             let leftBlocks: String
-            if leftHeight <= 1 {
+            if difference.overflow || difference.partialValue <= 1 {
                 leftBlocks = "1"
                 progress = 1
             } else {
-                leftBlocks = String(leftHeight)
+                leftBlocks = String(difference.partialValue)
             }
             DispatchQueue.main.async {
                 if strongSelf.conncetingState.value {
@@ -171,10 +205,10 @@ class AssetsTokenViewModel: NSObject {
         statusTextState.value = LocalizedString(key: "assets.sync.success", comment: "")
     }
     
-    private func storeToDB() {
-        let (balance, wallet_id, asset_id) = (self.wallet.balance, self._wallet.id, self.asset.id)
+    private func storeToDB(balance: String, history: TransactionHistory) {
+        let (wallet_id, asset_id) = (self._wallet.id, self.asset.id)
         DispatchQueue.global().async {
-            /// 写入数据库
+            /// 余额
             let updateWallet = Wallet.init()
             updateWallet.balance = balance
             _ = DBService.shared.updateWallet(on: [Wallet.Properties.balance], with: updateWallet, condition: Wallet.Properties.id.is(wallet_id))
@@ -185,74 +219,57 @@ class AssetsTokenViewModel: NSObject {
                     WalletService.shared.assetRefreshState.value = 1
                 }
             }
+            /// 交易历史
+            guard
+                DBService.shared.removeAllTransactions(condition: _Transaction_.Properties.walletId.is(wallet_id))
+            else {
+                return
+            }
+            _=DBService.shared.insertTransactions(list: history.all.map({ Transaction.init(item: $0) }),
+                                                walletId: wallet_id)
         }
     }
     
-    private func postData() {
+    private func postData(balance: String, history: TransactionHistory) {
         DispatchQueue.global().async {
         [weak self] in
             guard let `self` = self else { return }
-            let balance = self.wallet.balance
-            /// 数据转换
-            var allData = [TableViewSection()]
-            var inData = [TableViewSection()]
-            var outData = [TableViewSection()]
-            
-            for model in self.wallet.history.all {
-                var trans = Transaction()
-                trans.amount = model.amount
-                trans.token = self._wallet.token
-                trans.date = Date.init(timeIntervalSince1970: Double(model.timestamp)).toString("yyyy-MM-dd HH:mm:ss")
-                trans.fee = model.networkFee
-                trans.paymentId = model.paymentId
-                trans.hash = model.hash
-                trans.block = String(model.blockHeight)
-                if model.isFailed {
-                    trans.status = .failure
-                } else if model.isPending {
-                    trans.status = .proccessing
-                } else {
-                    trans.status = .success
-                }
-                var row: TableViewRow
-                switch model.direction {
-                case .received:
-                    trans.type = .in
-                    row = TransactionListCellFrame.toTableViewRow(trans)
-                    row.didSelectedAction = {
-                        [unowned self] _ in
-                        self.pushToTransaction(trans)
-                    }
-                    inData[0].rows.append(row)
-                case .sent:
-                    trans.type = .out
-                    row = TransactionListCellFrame.toTableViewRow(trans)
-                    row.didSelectedAction = {
-                        [unowned self] _ in
-                        self.pushToTransaction(trans)
-                    }
-                    outData[0].rows.append(row)
-                }
-                allData[0].rows.append(row)
-            }
-            if allData[0].rows.count == 0 {
-                allData = []
-            }
-            if inData[0].rows.count == 0 {
-                inData = []
-            }
-            if outData[0].rows.count == 0 {
-                outData = []
-            }
             
             let balance_modify = Helper.displayDigitsAmount(balance)
+            
+            /// 数据转换
+            let itemMapToRow = { (item: TransactionItem) -> TableViewRow in
+                let model = Transaction.init(item: item)
+                var row = TransactionListCellFrame.toTableViewRow(model)
+                row.didSelectedAction = {
+                    [unowned self] _ in
+                    self.pushToTransaction(model)
+                }
+                return row
+            }
+            
+            let allData = [TableViewSection(history.all.map(itemMapToRow))]
+            let receiveData = [TableViewSection(history.receive.map(itemMapToRow))]
+            let sendData = [TableViewSection(history.send.map(itemMapToRow))]
 
             DispatchQueue.main.async {
                 self.balanceState.value = balance_modify
-                self.historyState.value = [allData, inData, outData]
-                self.historyState.value = nil
+                self.historyState.newState([allData, receiveData, sendData])
             }
         }
+    }
+    
+    func toSwitchNode() -> UIViewController {
+        let model = TokenNodeModel.init(tokenImage: UIImage(named: "token_icon_XMR"),
+                                        tokenName: "XMR",
+                                        tokenNode: WalletDefaults.shared.node)
+        let viewModel = TokenNodeListViewModel.init(tokenNode: model) {
+        [unowned self] _ in
+            self.init_wallet()
+            AppManager.default.rootViewController?.popViewController(animated: true)
+        }
+        let viewController = TokenNodeListController.init(viewModel: viewModel)
+        return viewController
     }
     
     func toSend() -> UIViewController {
@@ -270,8 +287,7 @@ class AssetsTokenViewModel: NSObject {
         AppManager.default.rootViewController?.pushViewController(vc, animated: true)
     }
     
-    deinit {
-        dPrint("\(#function) ================================= \(self.classForCoder)")
+    private func closeWallet() {
         guard let wallet = self.wallet else { return }
         let isRefreshing = self.listening
         let isStoreSynced = self.isStoreSynced
@@ -287,6 +303,11 @@ class AssetsTokenViewModel: NSObject {
                 wallet.lock()
             }
         }
+    }
+    
+    deinit {
+        dPrint("\(#function) ================================= \(self.classForCoder)")
+        closeWallet()
     }
     
     

@@ -120,6 +120,7 @@ public class WalletService {
                 throw WalletError.createFailed
             }
             self.createdWallet = wallet
+            self.walletCreateSuccess(create)
             return wallet
         default:
             throw WalletError.createFailed
@@ -158,17 +159,53 @@ public class WalletService {
         })
     }
     
+    func disableWalletActive() -> Bool {
+        guard let old_wallet = getActiveWallet() else {
+            return false
+        }
+        old_wallet.isActive = false
+        return DBService.shared.updateWallet(on: [Wallet.Properties.isActive],
+                                                    with: old_wallet,
+                                                    condition: Wallet.Properties.id.is(old_wallet.id))
+    }
+    
     func updateActiveWallet(_ walletId: Int) -> Bool {
-        if let old_wallet = getActiveWallet() {
-            old_wallet.isActive = false
-            if !DBService.shared.updateWallet(on: [Wallet.Properties.isActive], with: old_wallet, condition: Wallet.Properties.id.is(old_wallet.id)) {
-                return false
-            }
+        guard disableWalletActive() else {
+            return false
         }
         let new_wallet = Wallet()
         new_wallet.id = walletId
         new_wallet.isActive = true
-        return DBService.shared.updateWallet(on: [Wallet.Properties.isActive], with: new_wallet, condition: Wallet.Properties.id.is(walletId))
+        return DBService.shared.updateWallet(on: [Wallet.Properties.isActive],
+                                             with: new_wallet,
+                                             condition: Wallet.Properties.id.is(walletId))
+    }
+    
+    func removeWallet(_ name: String) -> Bool {
+        do {
+            let docUrl = try FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let paths: [String] = try FileManager.default.contentsOfDirectory(atPath: docUrl.path).map({ docUrl.appendingPathComponent($0).path })
+            /// 如果存在就删除
+            try paths.forEach {
+                var isDir = ObjCBool(false)
+                if FileManager.default.fileExists(atPath: $0, isDirectory: &isDir),
+                    !isDir.boolValue,
+                    URL(fileURLWithPath: $0).lastPathComponent.hasPrefix(name),
+                    FileManager.default.isDeletableFile(atPath: $0)
+                {
+                    try FileManager.default.removeItem(atPath: $0)
+                }
+            }
+            /// 必须删除
+            while true {
+                if DBService.shared.deleteWallet(Wallet.Properties.name.is(name)) { break }
+            }
+            
+            return true
+        } catch {
+            dPrint(error)
+            return false
+        }
     }
     
     // MARK: - Methods (Private)
@@ -206,6 +243,21 @@ public class WalletService {
         db_wallet.isActive = false
         
         return DBService.shared.insertWallet(db_wallet)
+    }
+    
+    private func walletCreateSuccess(_ create: WalletCreate) {
+        guard WalletDefaults.shared.walletsCount > 1 else { return }
+        let walletName = create.name ?? ""
+        let condition = Wallet.Properties.name.is(walletName)
+        guard
+            let db_wallet = DBService.shared.getWallets(condition, orderBy: nil)?.first,
+            self.updateActiveWallet(db_wallet.id)
+        else {
+            return
+        }
+        DispatchQueue.main.async {
+            self.walletActiveState.value = db_wallet.id
+        }
     }
 
 }

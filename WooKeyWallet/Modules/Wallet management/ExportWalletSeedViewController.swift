@@ -117,9 +117,7 @@ class ExportWalletSeedViewController: BaseViewController {
                         HUD.showError(LocalizedString(key: "wallet.detail.import.error", comment: ""))
                     }
                 }
-                WalletService.shared.safeOperation({
-                    wallet.lock()
-                })
+                wallet.lock()
             } catch {
                 DispatchQueue.main.async {
                     HUD.hideHUD()

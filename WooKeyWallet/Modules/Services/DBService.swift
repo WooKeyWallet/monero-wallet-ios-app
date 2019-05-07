@@ -36,6 +36,7 @@ class DBService: NSObject {
             try database.create(table: DBTableNames.nodes, of: Node.self)
             try database.create(table: DBTableNames.assets, of: Asset.self)
             try database.create(table: DBTableNames.address_books, of: Address.self)
+            try database.create(table: DBTableNames.transactions, of: _Transaction_.self)
         } catch {
             dPrint(error)
         }
@@ -79,6 +80,7 @@ class DBService: NSObject {
         var status = true
         do {
             try database.delete(fromTable: DBTableNames.wallets, where: condition)
+            WalletDefaults.shared.walletsCount -= 1
         } catch {
             dPrint(error)
             status = false
@@ -239,5 +241,44 @@ class DBService: NSObject {
             status = false
         }
         return status
+    }
+    
+    func getTransactionList(condition: Condition, orderBy: [OrderBy]? = nil) -> [Transaction]? {
+        do {
+            let codingKeys: [PropertyConvertible] = _Transaction_.Properties.all
+            let list: [_Transaction_] = try database.getObjects(on: codingKeys,
+                                                                fromTable: DBTableNames.transactions,
+                                                                where: condition,
+                                                                orderBy: orderBy,
+                                                                limit: nil)
+            return list.map({ $0.value() })
+        } catch {
+            dPrint(error)
+            return nil
+        }
+    }
+    
+    func insertTransactions(list: [Transaction], walletId: Int) -> Bool {
+        do {
+            try database.begin()
+            try database.insert(objects: list.map({ _Transaction_.from($0, walletId: walletId) }), intoTable: DBTableNames.transactions)
+            try database.commit()
+            return true
+        } catch {
+            dPrint(error)
+            return false
+        }
+    }
+    
+    func removeAllTransactions(condition: Condition) -> Bool {
+        do {
+            try database.begin()
+            try self.database.delete(fromTable: DBTableNames.transactions, where: condition)
+            try database.commit()
+            return true
+        } catch {
+            dPrint(error)
+            return false
+        }
     }
 }

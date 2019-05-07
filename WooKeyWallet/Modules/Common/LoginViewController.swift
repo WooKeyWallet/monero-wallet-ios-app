@@ -103,6 +103,11 @@ class LoginViewController: BaseViewController {
         textView.addTarget(self, action: #selector(self.pwdInputAction(_:)), for: .editingChanged)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        textView.becomeFirstResponder()
+    }
+    
     // MARK: - Methods (Public)
     
     public class func show(_ cancelHidden: Bool = true, walletName: String, loginResult: ((String?) -> Void)?) {

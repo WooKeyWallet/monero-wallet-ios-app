@@ -5,10 +5,31 @@
 import UIKit
 
 struct NodeDefaults {
+    
     struct Monero {
-        static let `default` = "node.moneroworld.com:18089"
-        static let default0 = "opennode.xmr-tw.org:18089"
-        static let default1 = "uwillrunanodesoon.moneroworld.com:18089"
+        
+        static let default_en = "node.moneroworld.com:18089"
+        static let default_zh = "124.160.224.28:18081"
+        static let default1 = "opennode.xmr-tw.org:18089"
+        static let default2 = "uwillrunanodesoon.moneroworld.com:18089"
+        
+        static var `default`: String {
+            switch AppLanguage.manager.current {
+            case .en:
+                return default_en
+            case .zh:
+                return default_zh
+            }
+        }
+        
+        static var defaultList: [String] {
+            switch AppLanguage.manager.current {
+            case .en:
+                return [default_en, default_zh, default1, default2]
+            case .zh:
+                return [default_zh, default_en, default1, default2]
+            }
+        }
     }
 }
 

@@ -3,6 +3,7 @@
 
 
 import UIKit
+import SnapKit
 
 class CustomAlertView: UIView {
 
@@ -60,7 +61,7 @@ class CustomAlertView: UIView {
     
     public lazy var cancelBtn: UIButton = {
         let btn = UIButton()
-        btn.setImage(UIImage(named: "alert.canel"), for: .normal)
+        btn.setImage(UIImage(named: "alert_cancel"), for: .normal)
         return btn
     }()
     
@@ -70,11 +71,13 @@ class CustomAlertView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureView()
+        addKeyboradNotifications()
     }
     
     required init() {
         super.init(frame: .zero)
         configureView()
+        addKeyboradNotifications()
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -103,7 +106,7 @@ class CustomAlertView: UIView {
     internal func configureView() {
         addSubViews([
         contentBG,
-        cancelBtn,
+//        cancelBtn,
         ])
         contentBG.addSubViews([
         topIconView,
@@ -112,6 +115,7 @@ class CustomAlertView: UIView {
         contentLabel,
         customView,
         confirmBtn,
+        cancelBtn,
         ])
     }
     
@@ -120,11 +124,11 @@ class CustomAlertView: UIView {
         contentBG.snp.makeConstraints { (make) in
             make.left.equalToSuperview().offset(scale_width_375 * 29)
             make.right.equalToSuperview().offset(scale_width_375 * -29)
-            make.centerY.equalToSuperview().offset(scale_width_375 * -33)
+            make.centerY.equalToSuperview()
         }
         cancelBtn.snp.makeConstraints { (make) in
-            make.centerX.equalToSuperview()
-            make.top.equalTo(contentBG.snp.bottom).offset(34)
+            make.top.equalTo(4)
+            make.right.equalTo(-5)
             make.width.height.equalTo(34)
         }
         topIconView.snp.makeConstraints { (make) in
@@ -157,5 +161,70 @@ class CustomAlertView: UIView {
         }
     }
     
+    deinit {
+        removeKeyboradNotifications()
+    }
+}
+
+// MARK: - Keyborad Notifications
+
+extension CustomAlertView {
+    
+    private func addKeyboradNotifications() {
+        let (keyboardWillShow, keyboardWillHide) = (UIResponder.keyboardWillShowNotification, UIResponder.keyboardWillHideNotification)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShowNotification), name: keyboardWillShow, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHideNotification), name: keyboardWillHide, object: nil)
+    }
+    
+    private func removeKeyboradNotifications() {
+        [
+            UIResponder.keyboardWillShowNotification,
+            UIResponder.keyboardWillHideNotification,
+        ].forEach({
+            NotificationCenter.default.removeObserver(self, name: $0, object: nil)
+        })
+    }
+    
+    @objc private func keyboardWillShowNotification(_ noti: Notification) {
+        guard
+            let userInfo = noti.userInfo,
+            let kbEndFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+        else
+            { return }
+        
+        let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval ?? 0.25
+        
+        animateForContent(isKeyboradWillShow: true, duration: duration, kbEndFrame: kbEndFrame)
+        
+    }
+    
+    @objc private func keyboardWillHideNotification(_ noti: Notification) {
+        guard
+            let userInfo = noti.userInfo,
+            let kbEndFrame = userInfo[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect
+        else
+            { return }
+        
+        let duration = userInfo[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval ?? 0.25
+        
+        animateForContent(isKeyboradWillShow: false, duration: duration, kbEndFrame: kbEndFrame)
+    }
+    
+    private func animateForContent(isKeyboradWillShow: Bool, duration: TimeInterval, kbEndFrame: CGRect) {
+        let scale_width_375 = UIScreen.main.bounds.size.width / 375
+        let makeConstraints = { (make: ConstraintMaker) -> Void in
+            make.left.equalTo(scale_width_375 * 29)
+            make.right.equalTo(scale_width_375 * -29)
+            if isKeyboradWillShow {
+                make.bottom.equalTo(-10 - kbEndFrame.height)
+            } else {
+                make.centerY.equalToSuperview()
+            }
+        }
+        UIView.animate(withDuration: duration) {
+            self.contentBG.snp.remakeConstraints(makeConstraints)
+            self.layoutIfNeeded()
+        }
+    }
 
 }

@@ -118,17 +118,17 @@ class ImportFromWordsController: BaseViewController {
                 make.top.equalTo(wordsField.snp.bottom).offset(30)
                 make.left.right.equalTo(wordsField)
             }
-            blockNumField.snp.makeConstraints { (make) in
+            recentTransDateField.snp.makeConstraints { (make) in
                 make.top.equalTo(blockTipsLabel.snp.bottom).offset(15)
                 make.left.right.equalTo(blockTipsLabel)
             }
-            recentTransDateField.snp.makeConstraints { (make) in
-                make.top.equalTo(blockNumField.snp.bottom).offset(15)
-                make.left.right.equalTo(blockNumField)
+            blockNumField.snp.makeConstraints { (make) in
+                make.top.equalTo(recentTransDateField.snp.bottom).offset(15)
+                make.left.right.equalTo(recentTransDateField)
             }
             nextBtn.snp.makeConstraints { (make) in
-                make.top.equalTo(recentTransDateField.snp.bottom).offset(50)
-                make.left.right.equalTo(recentTransDateField)
+                make.top.equalTo(blockNumField.snp.bottom).offset(50)
+                make.left.right.equalTo(blockNumField)
                 make.height.equalTo(50)
             }
             

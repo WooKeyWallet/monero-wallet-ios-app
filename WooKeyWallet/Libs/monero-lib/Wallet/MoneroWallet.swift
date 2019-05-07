@@ -178,10 +178,9 @@ extension XMRWallet {
     }
     
     private func getUpdatedHistory() -> TransactionHistory {
-        let transactionHistory = TransactionHistory()
 
-        guard let moneroHistory = monero_getTrxHistory() else { return transactionHistory }
-        guard let transactions = moneroHistory.pointee.transactions else { return transactionHistory }
+        guard let moneroHistory = monero_getTrxHistory() else { return TransactionHistory([]) }
+        guard let transactions = moneroHistory.pointee.transactions else { return TransactionHistory([]) }
         let numberOfTransactions = moneroHistory.pointee.numberOfTransactions
 
         var unorderedHistory = [TransactionItem]()
@@ -206,8 +205,8 @@ extension XMRWallet {
         monero_deleteHistory(moneroHistory)
 
         // in reverse order: latest to oldest
-        transactionHistory.all = unorderedHistory.sorted{ return $0.timestamp > $1.timestamp }
-        return transactionHistory
+        let list = unorderedHistory.sorted{ return $0.timestamp > $1.timestamp }
+        return TransactionHistory(list)
     }
     
     public func setListener(listenerHandler: (() -> Void)?, newBlockHandler: ((UInt64,  UInt64) -> Void)?) {
@@ -239,21 +238,3 @@ extension XMRWallet {
     }
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

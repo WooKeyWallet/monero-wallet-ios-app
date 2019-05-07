@@ -37,6 +37,7 @@ class TokenWalletDetailViewController: BDTableViewController {
         {
             tableView.register(cellType: TokenWalletDetailViewCell.self)
             tableView.register(cellType: TokenWalletDeailHeaderCell.self)
+            tableView.register(cellType: TokenWalletDeleteCell.self)
             tableView.separatorInset.left = 25
         }
     }

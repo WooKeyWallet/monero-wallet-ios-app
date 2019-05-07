@@ -69,8 +69,19 @@ class TokenWalletDetailViewModel: NSObject {
             var section2 = TableViewSection.init([row_2_0, row_2_1])
             section2.headerHeight = 0.01
             section2.footerHeight = 10
+            
+            var row_3_0 = TableViewRow.init(nil, cellType: TokenWalletDeleteCell.self, rowHeight: 52)
+            row_3_0.didSelectedAction = {
+                [unowned self] _ in
+                DispatchQueue.main.async {
+                    self.toDeleteWallet()
+                }
+            }
+            var section3 = TableViewSection.init([row_3_0])
+            section3.headerHeight = 0.01
+            section3.footerHeight = 10
             DispatchQueue.main.async {
-                self.reloadDataState.newState([section0, section1, section2])
+                self.reloadDataState.newState([section0, section1, section2, section3])
             }
         }
     }
@@ -112,6 +123,30 @@ class TokenWalletDetailViewModel: NSObject {
             guard let pwd = pwd else { return }
             let vc = ExportWalletKeysViewController.init(walletName: self.tokenWallet.label, password: pwd)
             AppManager.default.rootViewController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    private func toDeleteWallet() {
+        guard !tokenWallet.in_use else {
+            HUD.showError(LocalizedString(key: "delete.wallet.onlineError", comment: ""))
+            return
+        }
+        LoginViewController.show(walletName: tokenWallet.label) { [unowned self] (pwd) in
+            guard let _ = pwd else { return }
+            HUD.showHUD()
+            WalletService.shared.safeOperation({
+                guard WalletService.shared.removeWallet(self.tokenWallet.label) else {
+                    DispatchQueue.main.async {
+                        HUD.showError(LocalizedString(key: "delete.failure", comment: ""))
+                    }
+                    return
+                }
+                DispatchQueue.main.async {
+                    WalletService.shared.walletActiveState.value = WalletService.shared.walletActiveState.value
+                    HUD.showSuccess(LocalizedString(key: "delete.success", comment: ""))
+                    AppManager.default.rootViewController?.popViewController(animated: true)
+                }
+            })
         }
     }
 }

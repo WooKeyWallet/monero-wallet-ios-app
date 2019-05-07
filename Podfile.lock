@@ -1,16 +1,16 @@
 PODS:
   - ActiveLabel (1.0.1)
-  - Alamofire (4.8.1)
-  - EFQRCode (4.5.0):
-    - swift_qrcodejs (~> 1.0.1)
-  - IQKeyboardManagerSwift (6.2.0)
+  - Alamofire (4.8.2)
+  - EFQRCode (5.0.0):
+    - swift_qrcodejs (~> 1.1.1)
+  - IQKeyboardManagerSwift (6.3.0)
   - Schedule (1.0.0)
   - SnapKit (4.2.0)
-  - SQLiteRepairKit (1.2.1):
+  - SQLiteRepairKit (1.2.2):
     - WCDBOptimizedSQLCipher (~> 1.2.0)
   - SVProgressHUD (2.2.5)
-  - swift_qrcodejs (1.0.1)
-  - WCDB.swift (1.0.7.5):
+  - swift_qrcodejs (1.1.1)
+  - WCDB.swift (1.0.8.2):
     - SQLiteRepairKit (~> 1.2.0)
     - WCDBOptimizedSQLCipher (~> 1.2.0)
   - WCDBOptimizedSQLCipher (1.2.1)
@@ -41,15 +41,15 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   ActiveLabel: b8b2396fe25308d563601437d6605bf691c3b5db
-  Alamofire: 16ce2c353fb72865124ddae8a57c5942388f4f11
-  EFQRCode: 842f431e660da841f518993af8f4cbd275601d84
-  IQKeyboardManagerSwift: b07ccf9d8cafe993dcd6cb794eb4ba34611a0c4e
+  Alamofire: ae5c501addb7afdbb13687d7f2f722c78734c2d3
+  EFQRCode: 07437cfbce3a1e497397a4f3d766c980d8972608
+  IQKeyboardManagerSwift: a8228c257614af98743b4cd8584637025f36358f
   Schedule: 64f334e01daa6f80201ab147b59cb4f1e118ae74
   SnapKit: fe8a619752f3f27075cc9a90244d75c6c3f27e2a
-  SQLiteRepairKit: 4d21bab9eff6a273f63da6815a0d1659e53f5bde
+  SQLiteRepairKit: 35aaae5a8838adb85f5b1eb4d796055be6060a4b
   SVProgressHUD: 1428aafac632c1f86f62aa4243ec12008d7a51d6
-  swift_qrcodejs: c181fe5c849d30c699546a23762d7e3dd143ab37
-  WCDB.swift: 87aee41f5ca3aded9c6f9b68b0ef3e88918a5ee2
+  swift_qrcodejs: 0bacbfe321a99954c7b8e04c75562007ea4e4f7c
+  WCDB.swift: 05d509d7a0e60fb6e11c34eb7e4027c0fab5849f
   WCDBOptimizedSQLCipher: baf44493b0c7a3d49e97bc5b64a3856f6428ddd1
 
 PODFILE CHECKSUM: db7696baccb87849f21916257fa1537156ee2f8a
