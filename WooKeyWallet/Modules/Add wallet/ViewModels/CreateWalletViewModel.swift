@@ -133,7 +133,7 @@ class CreateWalletViewModel: NSObject {
                     let wallet = try WalletService.shared.createWallet(self.create)
                     if let db_wallets = DBService.shared.getWallets(Wallet.Properties.name.is(self.create.name!), orderBy: nil) {
                         db_wallets.forEach({
-                            if $0.symbol == self.create.token?.rawValue {
+                            if $0.symbol == self.create.token.rawValue {
                                 WalletDefaults.shared.proceedWalletID = $0.id
                             }
                         })

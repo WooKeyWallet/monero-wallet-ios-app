@@ -2,6 +2,6 @@
   InfoPlist.strings
 */
 
-CFBundleDisplayName = "WooKey Wallet";
+CFBundleDisplayName = "Monero Wallet";
 NSCameraUsageDescription = "For QR code scanning to recognize the wallet address";
 NSPhotoLibraryUsageDescription = "For QR code scanning to recognize the wallet address";

@@ -54,8 +54,9 @@ class ContactUsViewCell: BaseTableViewCell {
     
     private lazy var linkBtn: UIButton = {
         let btn = UIButton()
-        btn.setTitleColor(UIColor(hex: 0x2179FF), for: .normal)
-        btn.setTitleColor(UIColor(hex: 0x2179FF).highlighted(), for: .highlighted)
+//        btn.setTitleColor(UIColor(hex: 0x2179FF), for: .normal)
+//        btn.setTitleColor(UIColor(hex: 0x2179FF).highlighted(), for: .highlighted)
+        btn.setTitleColor(AppTheme.Color.text_light, for: .normal)
         btn.titleLabel?.font = AppTheme.Font.text_small
         btn.titleLabel?.numberOfLines = 0
         btn.contentEdgeInsets = .zero
@@ -75,7 +76,7 @@ class ContactUsViewCell: BaseTableViewCell {
         super.initCell()
         nameLabel.font = AppTheme.Font.text_normal
         addSubViews([iconView, nameLabel, linkBtn, copyBtn])
-        linkBtn.addTarget(self, action: #selector(self.toLinkAction), for: .touchUpInside)
+//        linkBtn.addTarget(self, action: #selector(self.toLinkAction), for: .touchUpInside)
         copyBtn.addTarget(self, action: #selector(self.copyAction), for: .touchUpInside)
     }
     
@@ -154,7 +155,7 @@ class ContactUsViewController: BaseTableViewController {
                     UIPasteboard.general.string = style.url
                     HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
                 case .link:
-                    AppManager.default.openSafariViewController(with: style.url)
+                    AppManager.default.openSafari(with: style.url)
                 }
             }
             return row

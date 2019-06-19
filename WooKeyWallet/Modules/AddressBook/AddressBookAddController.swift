@@ -73,7 +73,8 @@ class AddressBookAddController: BaseViewController {
             }
             confirmBtn.snp.makeConstraints { (make) in
                 make.top.equalTo(selectionView.snp.bottom).offset(40)
-                make.left.right.equalTo(selectionView)
+                make.left.equalTo(25)
+                make.right.equalTo(-25)
                 make.height.equalTo(50)
             }
         }
@@ -87,7 +88,7 @@ class AddressBookAddController: BaseViewController {
             navigationItem.rightBarButtonItem = UIBarButtonItem.init(image: UIImage(named: "navigation_item_scan"), style: .plain, target: self, action: #selector(self.scanAction))
             labelField.addTarget(self, action: #selector(self.labelInputAction(_:)), for: .editingChanged)
             tokenField.addTarget(self, action: #selector(self.tokenInputAction(_:)), for: .editingChanged)
-            selectionView.addTapGestureRecognizer(target: self, selector: #selector(self.coinSelectAction))
+//            selectionView.addTapGestureRecognizer(target: self, selector: #selector(self.coinSelectAction))
             confirmBtn.addTarget(self, action: #selector(self.confirmAction), for: .touchUpInside)
         }
         

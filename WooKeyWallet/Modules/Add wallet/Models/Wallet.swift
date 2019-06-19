@@ -62,7 +62,7 @@ public struct WalletCreate {
     }
     
     var mode: Mode = .new
-    var token: Token?
+    let token: Token = .xmr
     var name: String?
     var pwd: String?
     var pwdTips: String?

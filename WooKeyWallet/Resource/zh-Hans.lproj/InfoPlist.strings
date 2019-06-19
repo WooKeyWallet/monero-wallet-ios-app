@@ -2,6 +2,6 @@
   InfoPlist.strings
 */
 
-CFBundleDisplayName = "WooKey Wallet";
+CFBundleDisplayName = "Monero Wallet";
 NSCameraUsageDescription = "用于扫描二维码识别钱包地址";
 NSPhotoLibraryUsageDescription = "用于扫描二维码识别钱包地址";

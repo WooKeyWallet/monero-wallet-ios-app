@@ -282,12 +282,6 @@ extension WebViewController: WKNavigationDelegate, WKUIDelegate, WKScriptMessage
             decisionHandler(.allow)
         }
         self.getLeftBarButtonItems()
-        
-        if let isItmsServices = navigationAction.request.url?.absoluteString.hasPrefix("itms-services"),
-            isItmsServices,
-            let url = navigationAction.request.url {
-            UIApplication.shared.openURL(url)
-        }
     }
     
     //2

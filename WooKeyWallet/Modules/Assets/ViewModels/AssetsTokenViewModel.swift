@@ -102,7 +102,7 @@ class AssetsTokenViewModel: NSObject {
                 self.statusTextState.value = LocalizedString(key: "assets.connect.ing", comment: "")
             }
         }
-        DispatchQueue.global(qos: .userInteractive).async {
+        DispatchQueue.global().async {
         [weak self] in
             guard let strongSelf = self else { return }
             let success = strongSelf.wallet.connectToDaemon(address: WalletDefaults.shared.node, upperTransactionSizeLimit: 0, daemonUsername: "", daemonPassword: "")
@@ -142,7 +142,7 @@ class AssetsTokenViewModel: NSObject {
                 }
                 strongSelf.synchronizedUI()
             }
-            DispatchQueue.global(qos: .userInteractive).async {
+            DispatchQueue.global().async {
                 guard let strongSelf = weakSelf else { return }
                 let (balance, history) = (strongSelf.wallet.balance, strongSelf.wallet.history)
                 strongSelf.storeToDB(balance: balance, history: history)

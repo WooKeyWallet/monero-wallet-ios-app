@@ -57,7 +57,7 @@ class TokenWalletDetailViewController: BDTableViewController {
                 _Self.dataSource = data
                 _Self.tableView.reloadData()
             }
-            viewModel.postData()
+            viewModel.configure()
         }
     }
 

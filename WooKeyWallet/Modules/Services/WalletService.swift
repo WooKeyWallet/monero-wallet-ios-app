@@ -37,6 +37,10 @@ public protocol WalletProtocol {
     
     func storeSycnhronized() -> Bool
     
+    
+    func addSubAddress(_ label: String) -> Bool
+    func getAllSubAddress() -> [SubAddress]
+    
 }
 
 public enum WalletError: Error {
@@ -77,7 +81,7 @@ public class WalletService {
     
     private var createdWallet: WalletProtocol?
     
-    private lazy var safeQueue = { DispatchQueue(label: "XMRWallet-Queue", qos: .userInteractive) }()
+    private lazy var safeQueue = { DispatchQueue(label: "XMRWallet-Queue") }()
     
     // MARK: - Methods (Public)
     
@@ -88,13 +92,20 @@ public class WalletService {
         return false
     }
     
+    public static func displayAddress(_ mainAddr: String) -> String {
+        let addr = WalletDefaults.shared.subAddressIndexs[mainAddr] ?? mainAddr
+        return addr
+    }
+    
+    
+    
     public func safeOperation(_ excute: (() -> Void)?) {
         guard let call = excute else { return }
         safeQueue.async(execute: call)
     }
     
     public func createWallet(_ create: WalletCreate) throws -> WalletProtocol  {
-        switch create.token! {
+        switch create.token {
         case .xmr:
             let walletBuilder = XMRWalletBuilder.init()
             var _wallet: WalletProtocol?
@@ -208,6 +219,8 @@ public class WalletService {
         }
     }
     
+    
+    
     // MARK: - Methods (Private)
     
     private func insertWallet(_ wallet: WalletProtocol, create: WalletCreate) -> Bool {
@@ -220,7 +233,7 @@ public class WalletService {
         
         let db_wallet = Wallet()
         db_wallet.name = create.name!
-        db_wallet.symbol = create.token!.rawValue
+        db_wallet.symbol = create.token.rawValue
         db_wallet.address = wallet.publicAddress
         db_wallet.passwordPrompt = create.pwdTips
         if create.mode == .recovery, let recovery = create.recovery {

@@ -64,13 +64,13 @@ class TokenWalletDeailHeaderCell: BaseTableViewCell {
         addSubViews([
             titleLabel,
             amountLabel,
-            addressBG,
+//            addressBG,
             ])
-        addressBG.addSubViews([
-            addressLabel,
-            copyBtn,
-            ])
-        copyBtn.addTarget(self, action: #selector(self.copyAction), for: .touchUpInside)
+//        addressBG.addSubViews([
+//            addressLabel,
+//            copyBtn,
+//            ])
+//        copyBtn.addTarget(self, action: #selector(self.copyAction), for: .touchUpInside)
     }
     
     private func configureConstaints() {
@@ -82,21 +82,21 @@ class TokenWalletDeailHeaderCell: BaseTableViewCell {
             make.centerX.equalToSuperview()
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
         }
-        addressBG.snp.makeConstraints { (make) in
-            make.left.equalTo(40)
-            make.right.equalTo(-40)
-            make.height.equalTo(28)
-            make.top.equalTo(amountLabel.snp.bottom).offset(20)
-        }
-        addressLabel.snp.makeConstraints { (make) in
-            make.left.equalTo(40)
-            make.right.equalTo(-40)
-            make.top.bottom.equalTo(0)
-        }
-        copyBtn.snp.makeConstraints { (make) in
-            make.top.bottom.right.equalTo(0)
-            make.width.equalTo(28)
-        }
+//        addressBG.snp.makeConstraints { (make) in
+//            make.left.equalTo(40)
+//            make.right.equalTo(-40)
+//            make.height.equalTo(28)
+//            make.top.equalTo(amountLabel.snp.bottom).offset(20)
+//        }
+//        addressLabel.snp.makeConstraints { (make) in
+//            make.left.equalTo(40)
+//            make.right.equalTo(-40)
+//            make.top.bottom.equalTo(0)
+//        }
+//        copyBtn.snp.makeConstraints { (make) in
+//            make.top.bottom.right.equalTo(0)
+//            make.width.equalTo(28)
+//        }
     }
     
     override func configure(with row: TableViewRow) {

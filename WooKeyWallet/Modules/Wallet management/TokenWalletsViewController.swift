@@ -10,19 +10,18 @@ class TokenWalletsViewController: BaseTableViewController {
     
     override var rowHeight: CGFloat { return 144 }
     
+    var wallets: [TokenWallet] = []
     
     // MARK: - Properties (Private)
     
-    private let symbol: String
-    private let wallets: [TokenWallet]
+    private let symbol: String = Token.xmr.rawValue
     
     private let viewModel: WalletManagementViewModel
     
 
     // MARK: - Life Cycles
     
-    init(viewModel: WalletManagementViewModel, symbol: String, wallets: [Wallet]) {
-        self.symbol = symbol
+    init(viewModel: WalletManagementViewModel, wallets: [Wallet]) {
         self.wallets = wallets.map({ TokenWallet.init($0) })
         self.viewModel = viewModel
         super.init()
@@ -58,7 +57,20 @@ class TokenWalletsViewController: BaseTableViewController {
     
     override func configureBinds() {
         super.configureBinds()
-        
+        loadData()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        if #available(iOS 11, *) {
+            let safeAreaInsets = UIApplication.shared.keyWindow?.safeAreaInsets ?? .zero
+            tableView.contentInset.bottom = 58 + safeAreaInsets.bottom + 15
+        } else {
+            tableView.contentInset.bottom = 58 + 15
+        }
+    }
+    
+    func loadData() {
         dataSource = [
             TableViewSection.init(wallets.map({
                 var row = TableViewRow.init($0, cellType: TokenWalletViewCell.self, rowHeight: rowHeight)
@@ -83,16 +95,6 @@ class TokenWalletsViewController: BaseTableViewController {
             }))
         ]
         tableView.reloadData()
-    }
-    
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        if #available(iOS 11, *) {
-            let safeAreaInsets = UIApplication.shared.keyWindow?.safeAreaInsets ?? .zero
-            tableView.contentInset.bottom = 58 + safeAreaInsets.bottom + 15
-        } else {
-            tableView.contentInset.bottom = 58 + 15
-        }
     }
     
     // MARK: - Methods (Private)

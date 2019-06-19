@@ -9,15 +9,6 @@ class WalletManagementViewController: BaseViewController {
     
     // MARK: - Properties (Public)
     
-    private var walletsView: CAPSPageMenu? {
-        didSet {
-            oldValue?.view.removeFromSuperview()
-            guard let walletsView = walletsView else { return }
-            view.addSubview(walletsView.view)
-            view.bringSubviewToFront(bottomBar)
-        }
-    }
-    
     
     // MARK: - Properties (Lazy)
     
@@ -34,6 +25,10 @@ class WalletManagementViewController: BaseViewController {
         bottomBar.layer.shadowOpacity = 0.3
         bottomBar.alpha = 9.1
         return bottomBar
+    }()
+    
+    private lazy var tokenVC = {
+        TokenWalletsViewController.init(viewModel: viewModel, wallets: [])
     }()
     
     private lazy var recoveryBtn: UIButton = {
@@ -82,8 +77,11 @@ class WalletManagementViewController: BaseViewController {
             }
             
             view.addSubViews([
+            tokenVC.view,
             bottomBar,
             ])
+            
+            addChild(tokenVC)
         }
     }
     
@@ -102,8 +100,6 @@ class WalletManagementViewController: BaseViewController {
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-        let navigationBar_H = UIApplication.shared.statusBarFrame.height + 44
         let bottomBar_H: CGFloat
         if #available(iOS 11, *) {
             bottomBar_H = 58 + view.safeAreaInsets.bottom
@@ -111,7 +107,16 @@ class WalletManagementViewController: BaseViewController {
             bottomBar_H = 58
         }
         bottomBar.frame = CGRect(x: 0, y: view.height - bottomBar_H, width: view.width, height: bottomBar_H)
-        walletsView?.view.frame = CGRect(x: 0, y: navigationBar_H, width: view.width, height: view.height - navigationBar_H)
+        tokenVC.view.frame = view.bounds
+    }
+    
+    
+    // MARK: - Methods (Private)
+    
+    private func toCreateWallet(_ model: WalletCreate) {
+        let viewModel = CreateWalletViewModel(create: model)
+        let vc = CreateWalletViewController(viewModel: viewModel)
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     
@@ -120,35 +125,21 @@ class WalletManagementViewController: BaseViewController {
     @objc private func recoveryBtnAction() {
         var create = WalletCreate()
         create.mode = .recovery
-        let vc = CurrencyPickerViewController.init(create)
-        navigationController?.pushViewController(vc, animated: true)
+        toCreateWallet(create)
     }
     
     @objc private func createBtnAction() {
         var create = WalletCreate()
         create.mode = .new
-        let vc = CurrencyPickerViewController.init(create)
-        navigationController?.pushViewController(vc, animated: true)
+        toCreateWallet(create)
     }
     
     // MARK: - Methods (Public)
     
     public func loadData() {
-        let wallets = WalletService.shared.getWallets()
-        var list = [String: [Wallet]]()
-        for w in wallets {
-            if let arr = list[w.symbol] {
-                var _arr = arr
-                _arr.append(w)
-                list[w.symbol] = _arr
-            } else {
-                list[w.symbol] = [w]
-            }
-        }
-        let viewControllers = list.map({ TokenWalletsViewController.init(viewModel: viewModel, symbol: $0.key, wallets: $0.value) })
-        let _frame = view.frame.inset(by: UIEdgeInsets(top: 0, left: 0, bottom: UIApplication.shared.statusBarFrame.height + 44, right: 0))
-        self.walletsView = CAPSPageMenu.init(viewControllers: viewControllers, frame: _frame, pageMenuOptions: CAPSPageMenuOption.menuItemWidthBasedOnTitleTextWidthOptions())
-        self.walletsView?.controllerScrollView.bounces = false
+        let wallets = WalletService.shared.getWallets().map({ TokenWallet($0) })
+        tokenVC.wallets = wallets
+        tokenVC.loadData()
     }
 
 }

@@ -34,7 +34,8 @@ class ReceiveViewModel: NSObject {
             }
             intergartedAddressState.value = integartedAddressText
             if integartedAddressText == "" {
-                generateQRCode(wallet.publicAddress)
+                let addr = WalletService.displayAddress(wallet.publicAddress)
+                generateQRCode(addr)
             } else {
                 generateQRCode(integartedAddressText)
             }
@@ -60,7 +61,15 @@ class ReceiveViewModel: NSObject {
     }
     
     func configure() {
-        addressState.value = wallet.publicAddress
+        WalletDefaults.shared.subAddressIndexState.observe(self) { (_, _Self) in
+            let key = _Self.wallet.publicAddress
+            let addr = WalletService.displayAddress(key)
+            if _Self.integartedAddressText == "" {
+                _Self.generateQRCode(addr)
+            }
+            guard !_Self.addressState.value.contains("*") else { return }
+            _Self.addressState.value = addr
+        }
         generateQRCode(wallet.publicAddress)
     }
     
@@ -107,12 +116,12 @@ class ReceiveViewModel: NSObject {
     }
     
     public func showHideAddress(_ isHidden: Bool) {
-        let addr = wallet.publicAddress
+        let addr = WalletService.displayAddress(wallet.publicAddress)
         addressState.value = !isHidden ? addr : String(addr.map({ _ in Character.init("*") }))
     }
     
     public func copyAddress() {
-        UIPasteboard.general.string = wallet.publicAddress
+        UIPasteboard.general.string = WalletService.displayAddress(wallet.publicAddress)
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
     
@@ -130,6 +139,11 @@ class ReceiveViewModel: NSObject {
         }
         UIPasteboard.general.string = integartedAddressText
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
+    }
+    
+    public func toSubAddress() -> UIViewController {
+        let viewModel = SubAddressViewModel(wallet: wallet)
+        return SubAddressViewController(viewModel: viewModel)
     }
     
 }

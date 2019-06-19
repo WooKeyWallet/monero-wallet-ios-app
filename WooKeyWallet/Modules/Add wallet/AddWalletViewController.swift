@@ -11,10 +11,7 @@ class AddWalletViewController: BaseViewController {
     override var hideNavigationBar: Bool { return true }
     
     
-    
     // MARK: - Properties (Private)
-    
-    private var walletCreate = WalletCreate()
     
     private lazy var createWalletBtn: UIButton = {
         let btn = UIButton.createCommon([
@@ -120,14 +117,20 @@ class AddWalletViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func createWalletAction() {
-        walletCreate.mode = .new
-        let vc = CurrencyPickerViewController.init(walletCreate)
-        navigationController?.pushViewController(vc, animated: true)
+        var model = WalletCreate()
+        model.mode = .new
+        toCreateWallet(model)
     }
     
     @objc private func importWalletAction() {
-        walletCreate.mode = .recovery
-        let vc = CurrencyPickerViewController.init(walletCreate)
+        var model = WalletCreate()
+        model.mode = .recovery
+        toCreateWallet(model)
+    }
+    
+    private func toCreateWallet(_ model: WalletCreate) {
+        let viewModel = CreateWalletViewModel(create: model)
+        let vc = CreateWalletViewController(viewModel: viewModel)
         navigationController?.pushViewController(vc, animated: true)
     }
 

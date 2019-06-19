@@ -88,7 +88,6 @@ class CurrencyPickerViewController: BaseTableViewController {
                 return
             }
             var create = self.create
-            create.token = token
             let vc = CreateWalletViewController.init(viewModel: CreateWalletViewModel.init(create: create))
             self.navigationController?.pushViewController(vc, animated: true)
         }

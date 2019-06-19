@@ -103,7 +103,7 @@ class AssetsViewController: BaseTableViewController {
     }
     
     @objc private func copyAction() {
-        UIPasteboard.general.string = wallet?.address
+        UIPasteboard.general.string = WalletService.displayAddress(wallet?.address ?? "")
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
 }

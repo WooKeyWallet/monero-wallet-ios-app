@@ -104,6 +104,10 @@ class ReceiveView: UIView {
         return btn
     }()
     
+    public lazy var subAddressBtn: UIButton = {
+        return createIconBtn(icon: UIImage(named: "receive_subaddress"))
+    }()
+    
     public lazy var copyAddressBtn: UIButton = {
         return createIconBtn(icon: UIImage(named: "receive_copy"))
     }()
@@ -158,6 +162,7 @@ class ReceiveView: UIView {
         addressView,
         addressTipLabel,
         showHideAddrBtn,
+        subAddressBtn,
         copyAddressBtn,
         
 //        amountField,
@@ -227,10 +232,15 @@ class ReceiveView: UIView {
             make.size.equalTo(32)
             make.right.bottom.equalTo(addressView)
         }
-        showHideAddrBtn.snp.makeConstraints { (make) in
+        subAddressBtn.snp.makeConstraints { (make) in
             make.size.equalTo(32)
             make.right.equalTo(copyAddressBtn.snp.left).offset(-5)
             make.bottom.equalTo(copyAddressBtn)
+        }
+        showHideAddrBtn.snp.makeConstraints { (make) in
+            make.size.equalTo(32)
+            make.right.equalTo(subAddressBtn.snp.left).offset(-6)
+            make.bottom.equalTo(subAddressBtn)
         }
         
 //        amountField.snp.makeConstraints { (make) in

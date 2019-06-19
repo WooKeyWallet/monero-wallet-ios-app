@@ -9,3 +9,9 @@ struct TokenWalletDetail {
     var assets: String = "" // 资产
     var address: String = "" // 地址
 }
+
+typealias TokenWalletDetaillViewCellModel = (
+    title: String,
+    detail: String,
+    showArrow: Bool
+)

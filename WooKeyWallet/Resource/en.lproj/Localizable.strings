@@ -31,6 +31,7 @@
 "pwdTips" = "Password Hint";
 "delete" = "Delete";
 "address" = "Address";
+"coin" = "Asset";
 "coinSelect" = "Select Asset";
 "optional" = " (Optional)";
 "none" = "None";
@@ -42,6 +43,12 @@
 "publicSpendKey" = "Public Spend Key";
 "secretSpendKey" = "Private Spend Key";
 "walletAddress" = "Wallet Address";
+"primaryAddress" = "Primary address";
+
+"deleteWallet" = "Delete Wallet";
+"delete.wallet.onlineError" = "Can not delete a [Online] wallet.";
+"delete.success" = "Deleted successfully";
+"delete.failure" = "Failed to delete";
 
 "loadFail" = "Failed to Load";
 
@@ -70,6 +77,16 @@
 "wallet.import.tokenSelect" = "Select Asset";
 "wallet.import.fromWords" = "From Mnemonic Words";
 "wallet.import.fromKeys" = "From Private Key";
+"wallet.import.blockTips.msg" = "If you don't set date or height, it may take several hours to sync.
+";
+"wallet.import.blockTips.cancel" = "Back to set";
+"wallet.import.blockTips.confirm" = "Continue";
+
+"wallet.subAddress.title" = "Addresses";
+"wallet.subAddress.tips1" = "You can add more subaddresses to protect your privacy.";
+"wallet.subAddress.tips2" = "The address which you select, would become the default address.";
+"wallet.subAddress.add.title" = "Address Label";
+"wallet.subAddress.add.placeholder" = "Label of the new address";
 
 "settings.wallet" = "Wallet Management";
 "settings.pin" = "PIN";

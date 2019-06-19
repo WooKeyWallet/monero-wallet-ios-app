@@ -121,6 +121,12 @@ class AssetsTokenViewController: BaseViewController {
         
         do //// Wallet Syncing
         {
+            WalletDefaults.shared.subAddressIndexState.observe(self) { (_, _Self) in
+                if let key = _Self.tokenAssets.wallet?.address
+                {
+                    _Self.tokenAssetsView.tokenAddress.text = WalletService.displayAddress(key)
+                }
+            }
 //            viewModel.refreshState.observe(navigationItem.rightBarButtonItem!) { (enable, rightBarButtonItem) in
 //                rightBarButtonItem.isEnabled = enable
 //            }
@@ -199,7 +205,7 @@ class AssetsTokenViewController: BaseViewController {
     }
     
     @objc private func copyAction() {
-        UIPasteboard.general.string = tokenAssets.wallet?.address
+        UIPasteboard.general.string = WalletService.displayAddress(tokenAssets.wallet?.address ?? "")
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
 

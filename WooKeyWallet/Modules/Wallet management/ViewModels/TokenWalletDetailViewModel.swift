@@ -23,11 +23,17 @@ class TokenWalletDetailViewModel: NSObject {
         super.init()
     }
     
-    func postData() {
+    func configure() {
+        WalletDefaults.shared.subAddressIndexState.observe(self) { (_, _Self) in
+            _Self.postData()
+        }
+    }
+    
+    private func postData() {
         DispatchQueue.global().async {
             /// header
             let headerData = TokenWalletDetail.init(token: self.tokenWallet.token, assets: self.tokenWallet.amount, address: self.tokenWallet.address)
-            var row_0_0 = TableViewRow.init(headerData, cellType: TokenWalletDeailHeaderCell.self, rowHeight: 146)
+            var row_0_0 = TableViewRow.init(headerData, cellType: TokenWalletDeailHeaderCell.self, rowHeight: /*146*/110)
             row_0_0.actionHandler = {
                 [unowned self] _ in
                 DispatchQueue.main.async {
@@ -39,34 +45,52 @@ class TokenWalletDetailViewModel: NSObject {
             section0.footerHeight = 10
             
             /// dataSource
-            let row_1_0 = TableViewRow.init((LocalizedString(key: "wallet.detail.name", comment: ""), self.tokenWallet.label), cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
-            var row_1_1 = TableViewRow.init((LocalizedString(key: "wallet.detail.pwd.tips", comment: ""), ""), cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
+            let modelList: [[TokenWalletDetaillViewCellModel]] = [
+                [],
+                [
+                    (title: LocalizedString(key: "wallet.detail.name", comment: ""), detail: self.tokenWallet.label, showArrow: false),
+                    (title: LocalizedString(key: "wallet.subAddress.title", comment: ""), detail: WalletService.displayAddress(self.tokenWallet.address), showArrow: true),
+                ],
+                [
+                    (title: LocalizedString(key: "wallet.detail.pwd.tips", comment: ""), detail: "", showArrow: true),
+                    (title: LocalizedString(key: "wallet.detail.import.seed", comment: ""), detail: "", showArrow: true),
+                    (title: LocalizedString(key: "wallet.detail.import.keys", comment: ""), detail: "", showArrow: true),
+                ],
+            ]
+            let row_1_0 = TableViewRow.init(modelList[1][0], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
+            var row_1_1 = TableViewRow.init(modelList[1][1], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
             row_1_1.didSelectedAction = {
                 [unowned self] _ in
                 DispatchQueue.main.async {
-                    self.showPasswordTips()
+                    self.toSubAddress()
                 }
             }
             var section1 = TableViewSection.init([row_1_0, row_1_1])
             section1.headerHeight = 0.01
             section1.footerHeight = 10
             
-            
-            var row_2_0 = TableViewRow.init((LocalizedString(key: "wallet.detail.import.seed", comment: ""), ""), cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
-            var row_2_1 = TableViewRow.init((LocalizedString(key: "wallet.detail.import.keys", comment: ""), ""), cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
+            var row_2_0 = TableViewRow.init(modelList[2][0], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
+            var row_2_1 = TableViewRow.init(modelList[2][1], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
+            var row_2_2 = TableViewRow.init(modelList[2][2], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
             row_2_0.didSelectedAction = {
                 [unowned self] _ in
                 DispatchQueue.main.async {
-                    self.toExportSeed()
+                    self.showPasswordTips()
                 }
             }
             row_2_1.didSelectedAction = {
                 [unowned self] _ in
                 DispatchQueue.main.async {
+                    self.toExportSeed()
+                }
+            }
+            row_2_2.didSelectedAction = {
+                [unowned self] _ in
+                DispatchQueue.main.async {
                     self.toExportKeys()
                 }
             }
-            var section2 = TableViewSection.init([row_2_0, row_2_1])
+            var section2 = TableViewSection.init([row_2_0, row_2_1, row_2_2])
             section2.headerHeight = 0.01
             section2.footerHeight = 10
             
@@ -99,6 +123,35 @@ class TokenWalletDetailViewModel: NSObject {
     private func copyAddress() {
         UIPasteboard.general.string = tokenWallet.address
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
+    }
+    
+    private func toSubAddress() {
+        LoginViewController.show(walletName: tokenWallet.label) {
+        [unowned self] (pwd) in
+            guard let pwd = pwd else { return }
+            HUD.showHUD()
+            WalletService.shared.safeOperation({
+                do {
+                    let wallet = try WalletService.shared.loginWallet(self.tokenWallet.label, password: pwd)
+                    let viewModel = SubAddressViewModel(wallet: wallet, deallocClosure: { _wallet in
+                        WalletService.shared.safeOperation({
+                            _wallet.lock()
+                        })
+                    })
+                    let vc = SubAddressViewController(viewModel: viewModel)
+                    DispatchQueue.main.async {
+                        HUD.hideHUD()
+                        AppManager.default.rootViewController?.pushViewController(vc, animated: true)
+                    }
+                } catch {
+                    DispatchQueue.main.async {
+                        HUD.hideHUD()
+                        HUD.showError(LocalizedString(key: "loadFail", comment: ""))
+                    }
+                }
+            })
+        }
+        
     }
     
     private func showPasswordTips() {

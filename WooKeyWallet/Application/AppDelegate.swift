@@ -45,7 +45,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 AppManager.default.configureIQKeyboard()
                 HUD.setupAppearence()
             }
-            
             // global
             DispatchQueue.global().async {
                 DBService.shared.setup()
@@ -85,8 +84,9 @@ extension AppDelegate {
     private func addBlurForWindow() {
         let blur: UIBlurEffect
         blur = UIBlurEffect(style: .light)
-        let visualView = UIVisualEffectView(effect: blur)
+        let visualView = VisualEffectView(effect: blur)
         visualView.frame = self.window?.bounds ?? .zero
+        visualView.blurRadius = px(18)
         self.window?.addSubview(visualView)
         self.visualEffectView = visualView
     }

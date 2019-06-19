@@ -67,6 +67,7 @@ class ReceiveViewController: BaseViewController {
             // Btns
             receiveView.addTapGestureRecognizer(target: self, selector: #selector(self.unfoldAction(_:)))
             receiveView.showHideAddrBtn.addTarget(self, action: #selector(self.showHideAddressAction), for: .touchUpInside)
+            receiveView.subAddressBtn.addTarget(self, action: #selector(self.toSubAddressAction), for: .touchUpInside)
             receiveView.copyAddressBtn.addTarget(self, action: #selector(self.copyAddressAction), for: .touchUpInside)
             receiveView.newPayIdBtn.addTarget(self, action: #selector(self.generatePaymentIdAction), for: .touchUpInside)
             receiveView.copyPayIdBtn.addTarget(self, action: #selector(self.copyPaymentIdAction), for: .touchUpInside)
@@ -134,6 +135,10 @@ class ReceiveViewController: BaseViewController {
     
     @objc private func copyIntegartAddrAction() {
         viewModel.copyIntegartedAddress()
+    }
+    
+    @objc private func toSubAddressAction() {
+        navigationController?.pushViewController(viewModel.toSubAddress(), animated: true)
     }
 
 }

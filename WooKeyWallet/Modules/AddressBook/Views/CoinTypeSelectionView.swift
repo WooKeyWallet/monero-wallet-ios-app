@@ -10,7 +10,7 @@ class CoinTypeSelectionView: UIView {
     
     private lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = LocalizedString(key: "coinSelect", comment: "")
+        label.text = LocalizedString(key: "coin", comment: "")
         label.textColor = AppTheme.Color.text_dark
         label.font = AppTheme.Font.text_normal
         return label
@@ -62,7 +62,7 @@ class CoinTypeSelectionView: UIView {
         titleLabel,
         tokenIcon,
         tokenNameLab,
-        arrow,
+//        arrow,
         ])
     }
     
@@ -77,13 +77,13 @@ class CoinTypeSelectionView: UIView {
         }
         tokenNameLab.snp.makeConstraints { (make) in
             make.centerY.equalToSuperview()
-            make.right.equalTo(arrow.snp.left).offset(-10)
-        }
-        arrow.snp.makeConstraints { (make) in
-            make.centerY.equalToSuperview()
             make.right.equalTo(0)
-            make.size.equalTo(CGSize(width: 8, height: 13))
         }
+//        arrow.snp.makeConstraints { (make) in
+//            make.centerY.equalToSuperview()
+//            make.right.equalTo(0)
+//            make.size.equalTo(CGSize(width: 8, height: 13))
+//        }
     }
     
     func test() {

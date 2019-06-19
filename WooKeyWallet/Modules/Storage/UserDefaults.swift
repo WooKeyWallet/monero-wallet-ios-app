@@ -8,6 +8,7 @@ private struct KeyPath {
     static let walletsCount = "walletsCountKey"
     static let node_current = "node_current_key"
     static let wallet_proceed = "walletProceedKey"
+    static let wallet_subAddress_index = "walletIndexSubAddressKey"
 }
 
 public class WalletDefaults: UserDefaults {
@@ -38,7 +39,21 @@ public class WalletDefaults: UserDefaults {
             set(newValue, forKey: KeyPath.node_current)
         }
     }
-        
+    
+    public typealias SubAddressIndexs = [String: String]
+    public var subAddressIndexs: SubAddressIndexs {
+        get { return value(forKey: KeyPath.wallet_subAddress_index) as? SubAddressIndexs ?? [:] }
+        set {
+            set(newValue, forKey: KeyPath.wallet_subAddress_index)
+            if newValue != subAddressIndexState.value {
+                DispatchQueue.main.async {
+                    self.subAddressIndexState.value = newValue
+                }
+            }
+        }
+    }
+    
+    lazy var subAddressIndexState = { Observable<SubAddressIndexs>(subAddressIndexs) }()
     
     // MARK: - Methods
     

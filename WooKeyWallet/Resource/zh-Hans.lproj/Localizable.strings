@@ -31,6 +31,7 @@
 "pwdTips" = "密码提示";
 "delete" = "删除";
 "address" = "地址";
+"coin" = "币种";
 "coinSelect" = "选择币种";
 "optional" = "（选填）";
 "none" = "无";
@@ -42,6 +43,12 @@
 "publicSpendKey" = "支付公钥";
 "secretSpendKey" = "支付私钥";
 "walletAddress" = "钱包地址";
+"primaryAddress" = "主地址";
+
+"deleteWallet" = "删除钱包";
+"delete.wallet.onlineError" = "无法删除使用中的钱包";
+"delete.success" = "删除成功";
+"delete.failure" = "删除失败";
 
 "loadFail" = "加载失败";
 
@@ -70,6 +77,15 @@
 "wallet.import.tokenSelect" = "币种选择";
 "wallet.import.fromWords" = "助记词导入";
 "wallet.import.fromKeys" = "私钥导入";
+"wallet.import.blockTips.msg" = "未填写区块号或近期交易时间，可能需要同步几小时";
+"wallet.import.blockTips.cancel" = "去填";
+"wallet.import.blockTips.confirm" = "坚决不填";
+
+"wallet.subAddress.title" = "地址设置";
+"wallet.subAddress.tips1" = "您可以添加多个不同的地址，以保护您的隐私";
+"wallet.subAddress.tips2" = "选中的地址将作为默认地址";
+"wallet.subAddress.add.title" = "地址标签";
+"wallet.subAddress.add.placeholder" = "请输入地址标签";
 
 "settings.wallet" = "钱包管理";
 "settings.pin" = "PIN码";
@@ -88,7 +104,7 @@
 "node.verify.error" = "节点连接失败，请重试";
 
 "words.input.title" = "助记词";
-"words.input.placeholder" = "输入助记词，用空格分割";
+"words.input.placeholder" = "输入助记词，用空格分隔";
 "words.input.blockNum" = "区块号（选填）";
 "words.input.transDate" = "近期交易日期（选填）";
 
