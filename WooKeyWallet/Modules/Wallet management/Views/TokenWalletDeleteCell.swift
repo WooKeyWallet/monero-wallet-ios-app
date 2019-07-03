@@ -2,7 +2,7 @@
 //  TokenWalletDeleteCell.swift
 //  Wookey
 //
-//  Created by jowsing on 2019/4/24.
+//  Created by Wookey on 2019/4/24.
 //  Copyright © 2019 Wookey. All rights reserved.
 //
 

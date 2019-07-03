@@ -140,6 +140,26 @@ extension XMRWallet {
     public func validAddress(_ address: String) -> Bool {
         return monero_isValidWalletAddress(address)
     }
+    
+    
+    public func addSubAddress(_ label: String) -> Bool {
+        return monero_addSubAddress(0, label)
+    }
+    
+    public func getAllSubAddress() -> [SubAddress] {
+        guard let subAddress = monero_getAllSubAddress(),
+            let list = subAddress.pointee.list
+        else { return [] }
+        let convertArray = InteropConverter.convert(data: list, elementCount: subAddress.pointee.count)
+        var resultList = [SubAddress]()
+        for item in convertArray {
+            if let pt = item?.pointee {
+                resultList.append(SubAddress(rowId: pt.rowId, address: String(cString: pt.address), label: String(cString: pt.label)))
+            }
+        }
+        dPrint(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \(resultList)")
+        return resultList
+    }
 
     public func createPendingTransaction(_ dstAddress: String, paymentId: String, amount: String) -> Bool {
         return monero_createTransaction(dstAddress,

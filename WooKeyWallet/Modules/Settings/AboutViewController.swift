@@ -19,7 +19,7 @@ class AboutViewController: BaseViewController {
         do /// Views
         {
             let iconView = UIImageView()
-            iconView.image = UIImage.bundleImage("about_icon")
+            iconView.image = UIImage.bundleImage("team_logo")
             view.addSubview(iconView)
             
             let versionLabel = UILabel()
@@ -43,7 +43,7 @@ class AboutViewController: BaseViewController {
             view.addSubview(btnContainer)
             
             let btnLabel = UILabel()
-            btnLabel.text = "WooKey Wallet"
+            btnLabel.text = AppInfo.displayName
             btnLabel.textColor = AppTheme.Color.text_light
             btnLabel.font = UIFont.systemFont(ofSize: 11)
             btnContainer.addSubview(btnLabel)

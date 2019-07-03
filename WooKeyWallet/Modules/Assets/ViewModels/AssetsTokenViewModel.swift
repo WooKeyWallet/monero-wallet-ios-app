@@ -101,22 +101,22 @@ class AssetsTokenViewModel: NSObject {
                 self.conncetingState.value = true
                 self.statusTextState.value = LocalizedString(key: "assets.connect.ing", comment: "")
             }
-        }
-        DispatchQueue.global().async {
-        [weak self] in
-            guard let strongSelf = self else { return }
-            let success = strongSelf.wallet.connectToDaemon(address: WalletDefaults.shared.node, upperTransactionSizeLimit: 0, daemonUsername: "", daemonPassword: "")
-            if success {
-                WalletService.shared.safeOperation({
-                    guard let strongSelf = self else { return }
-                    strongSelf.listen()
-                })
-            } else {
+            WalletService.shared.safeOperation {
+            [weak self] in
+                guard let strongSelf = self else { return }
+                let success = strongSelf.wallet.connectToDaemon(address: WalletDefaults.shared.node, upperTransactionSizeLimit: 0, daemonUsername: "", daemonPassword: "")
                 DispatchQueue.main.async {
-                    guard let strongSelf = self else { return }
-                    strongSelf.statusTextState.value = LocalizedString(key: "assets.connect.failure", comment: "")
-                    strongSelf.conncetingState.value = false
-                    strongSelf.refreshState.value = true
+                    if success {
+                        WalletService.shared.safeOperation({
+                            guard let strongSelf = self else { return }
+                            strongSelf.listen()
+                        })
+                    } else {
+                        guard let strongSelf = self else { return }
+                        strongSelf.statusTextState.value = LocalizedString(key: "assets.connect.failure", comment: "")
+                        strongSelf.conncetingState.value = false
+                        strongSelf.refreshState.value = true
+                    }
                 }
             }
         }

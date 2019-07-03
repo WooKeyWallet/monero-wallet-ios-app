@@ -9,6 +9,8 @@ private struct KeyPath {
     static let node_current = "node_current_key"
     static let wallet_proceed = "walletProceedKey"
     static let wallet_subAddress_index = "walletIndexSubAddressKey"
+    static let hiddenAsset = "hiddenAssetKey"
+    static let subAddressLabels = "Labels-"
 }
 
 public class WalletDefaults: UserDefaults {
@@ -53,9 +55,27 @@ public class WalletDefaults: UserDefaults {
         }
     }
     
+    public var hiddenAsset: Bool {
+        get { return bool(forKey: KeyPath.hiddenAsset) }
+        set {
+            setValue(newValue, forKey: KeyPath.hiddenAsset)
+        }
+    }
+    
     lazy var subAddressIndexState = { Observable<SubAddressIndexs>(subAddressIndexs) }()
+    
     
     // MARK: - Methods
     
+    func addSubAddress(label: String, publicAddress: String) {
+        let key = KeyPath.subAddressLabels + publicAddress
+        var labels = value(forKey: key) as? [String] ?? []
+        labels.append(label)
+        setValue(labels, forKey: key)
+    }
     
+    func getSubAddressLabels(_ publicAddress: String) -> [String] {
+        let key = KeyPath.subAddressLabels + publicAddress
+        return value(forKey: key) as? [String] ?? []
+    }
 }

@@ -457,9 +457,45 @@ const char* monero_displayAmount(uint64_t amount)
     return strdup(str.c_str());
 }
 
-// ----------------------------------------------------------------------------
-// Transactions
-// ----------------------------------------------------------------------------
+#pragma mark - SubAddress
+
+bool monero_addSubAddress(uint32_t accountIndex, const char* label) {
+    if (!monero_wallet) {
+        return false;
+    }
+    monero_wallet->addSubaddress(accountIndex, label);
+    return true;
+}
+
+monero_subAddress* monero_getAllSubAddress() {
+    if (!monero_wallet) {
+        return NULL;
+    }
+    Monero::Subaddress* subAddress = monero_wallet->subaddress();
+    if (!subAddress) {
+        return NULL;
+    }
+    
+    subAddress->refresh(0);
+    
+    std::vector<Monero::SubaddressRow *> all = subAddress->getAll();
+    std::size_t allCount = all.size();
+    monero_subAddress *result = new monero_subAddress;
+    result->count = allCount;
+    result->list = new monero_subAddressRow*[allCount];
+    for (std::size_t i = 0; i < allCount; ++i) {
+        Monero::SubaddressRow *item = all[i];
+        monero_subAddressRow *_item = new monero_subAddressRow;
+        _item->rowId = item->getRowId();
+        _item->address = strdup(item->getAddress().c_str());
+        _item->label = strdup(item->getLabel().c_str());
+        result->list[i] = _item;
+    }
+    return result;
+}
+
+
+#pragma mark - Transactions
 
 static Monero::PendingTransaction* _pendingTransaction;
 

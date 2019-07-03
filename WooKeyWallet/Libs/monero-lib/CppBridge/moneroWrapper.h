@@ -130,6 +130,22 @@ extern "C" {
     struct monero_history* monero_getTrxHistory();
     void monero_deleteHistory(struct monero_history* history);
     
+    
+    struct monero_subAddressRow {
+        size_t rowId;
+        const char *address;
+        const char *label;
+    };
+    
+    struct monero_subAddress {
+        size_t count;
+        struct monero_subAddressRow** list;
+    };
+    
+    bool monero_addSubAddress(uint32_t accountIndex, const char* label);
+    
+    struct monero_subAddress* monero_getAllSubAddress();
+    
     // Transactions
     // ----------------------------------------------------------------------------
 

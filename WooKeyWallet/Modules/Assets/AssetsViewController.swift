@@ -49,6 +49,7 @@ class AssetsViewController: BaseTableViewController {
                 let btn = UIButton(frame: .zero)
                 btn.setImage(UIImage(named: "assets_eye_show"), for: .normal)
                 btn.setImage(UIImage(named: "assets_eye_hidden"), for: .selected)
+                btn.isSelected = WalletDefaults.shared.hiddenAsset
                 btn.sizeToFit()
                 btn.addTarget(self, action: #selector(self.rightBarButtonAction(_:)), for: .touchUpInside)
                 return UIBarButtonItem.init(customView: btn)
@@ -100,6 +101,7 @@ class AssetsViewController: BaseTableViewController {
     @objc private func rightBarButtonAction(_ btn: UIButton) {
         btn.isSelected = !btn.isSelected
         footer.balanceSecureTextEntryState = btn.isSelected
+        WalletDefaults.shared.hiddenAsset = btn.isSelected
     }
     
     @objc private func copyAction() {

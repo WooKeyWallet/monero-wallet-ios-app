@@ -25,6 +25,9 @@ class SubAddressViewModel: NSObject {
         self.wallet = wallet
         self.deallocClosure = deallocClosure
         super.init()
+        WalletDefaults.shared.getSubAddressLabels(wallet.publicAddress).forEach({
+            _ = wallet.addSubAddress($0)
+        })
     }
     
     deinit {
@@ -56,7 +59,8 @@ class SubAddressViewModel: NSObject {
     }
     
     func addSubAddress(label: String) {
-        if self.wallet.addSubAddress(label) {
+        if wallet.addSubAddress(label) {
+            WalletDefaults.shared.addSubAddress(label: label, publicAddress: wallet.publicAddress)
             configureData()
         } else {
             HUD.showError(LocalizedString(key: "add_fail", comment: ""))

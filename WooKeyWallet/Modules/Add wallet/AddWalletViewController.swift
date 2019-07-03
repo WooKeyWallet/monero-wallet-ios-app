@@ -41,19 +41,11 @@ class AddWalletViewController: BaseViewController {
         
         /// initSubViews
         let initSubViews = {
-            () -> (topIcon: UIImageView, slogenLabel: UILabel, tipLabel: UILabel) in
+            () -> (topIcon: UIImageView, tipLabel: UILabel) in
             // topIcon
             let topIcon = UIImageView()
             topIcon.image = UIImage.bundleImage("about_icon")
             self.view.addSubview(topIcon)
-            
-            // slogenLabel
-            let slogenLabel = UILabel()
-            slogenLabel.textAlignment = .center
-            slogenLabel.textColor = AppTheme.Color.main_slogen
-            slogenLabel.font = AppTheme.Font.text_smaller
-            slogenLabel.text = LocalizedString(key: "wallet.add.slogen", comment: "为隐私而生")
-            self.view.addSubview(slogenLabel)
             
             // tipLabel
             let tipLabel = UILabel()
@@ -68,7 +60,7 @@ class AddWalletViewController: BaseViewController {
             self.view.addSubview(self.createWalletBtn)
             self.view.addSubview(self.importWalletBtn)
             
-            return (topIcon, slogenLabel, tipLabel)
+            return (topIcon, tipLabel)
         }()
         
         
@@ -78,17 +70,13 @@ class AddWalletViewController: BaseViewController {
             let scaleToHeight = view.height / 667
             initSubViews.topIcon.snp.makeConstraints { (make) in
                 make.centerX.equalToSuperview()
-                make.top.equalToSuperview().offset(96 * scaleToHeight + UIApplication.shared.statusBarFrame.height + 44)
-                make.size.equalTo(CGSize(width: 152, height: 110))
-            }
-            initSubViews.slogenLabel.snp.makeConstraints { (make) in
-                make.centerX.equalToSuperview()
-                make.top.equalTo(initSubViews.topIcon.snp.bottom).offset(9)
+                make.top.equalToSuperview().offset(123 * scaleToHeight + UIApplication.shared.statusBarFrame.height)
+                make.size.equalTo(CGSize(width: 181, height: 135))
             }
             initSubViews.tipLabel.snp.makeConstraints { (make) in
                 make.left.equalToSuperview().offset(28)
                 make.right.equalToSuperview().offset(-28)
-                make.bottom.equalTo(createWalletBtn.snp.top).offset(-75)
+                make.bottom.equalTo(createWalletBtn.snp.top).offset(-70)
             }
             createWalletBtn.snp.makeConstraints { (make) in
                 make.left.right.equalTo(initSubViews.tipLabel)
@@ -103,7 +91,6 @@ class AddWalletViewController: BaseViewController {
                     make.bottom.equalTo(self.bottomLayoutGuide.snp.bottom).offset(-45)
                 }
             }
-            
         }
     }
     

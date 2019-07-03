@@ -64,7 +64,7 @@
 "wallet.add.create" = "创建钱包";
 "wallet.add.import" = "导入钱包";
 "wallet.add.slogen" = "为隐私而生";
-"wallet.add.tips" = "使用WooKey Wallet至少需要一个钱包，您可以选择创建钱包或导入已有的钱包";
+"wallet.add.tips" = "使用Monero Wallet至少需要一个钱包，您可以选择创建钱包或导入已有的钱包";
 "wallet.create.tip1" = "为了保护您的资产安全，请先设置密码，密码用于私钥和交易授权";
 "wallet.create.tip2" = "密码为本地密码，WooKey 将不存储密码，也无法找回，请务必妥善保管";
 "wallet.create.tip3" = "不少于8位，建议混合大小写字母、数字、特殊符号";
@@ -201,3 +201,5 @@
 "about.service" = "《服务协议》";
 "about.text" = "WooKey 团队致力于提供安全、专业、可靠、易用的数字资产钱包应用，守护用户的隐私和财产自由，推动加密货币的普及与发展。";
 "blockHeight.tips" = "* 为了极大提升区块同步速度，我们强烈建议您填写区块号或近期交易时间";
+
+"transaction.block.url" = "到区块浏览器查询更多的信息>>";

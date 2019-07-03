@@ -46,7 +46,7 @@ class TransactionDetailController: BaseViewController {
             scrollView.backgroundColor = AppTheme.Color.tableView_bg
             view.addSubview(scrollView)
             
-            scrollView.contentView.addSubview(detailView)
+            scrollView.contentView.addSubViews([detailView])
             
             detailView.snp.makeConstraints { (make) in
                 make.left.equalTo(23)
@@ -73,4 +73,5 @@ class TransactionDetailController: BaseViewController {
         UIPasteboard.general.string = transaction.hash
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
+    
 }

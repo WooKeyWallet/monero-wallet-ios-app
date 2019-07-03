@@ -8,7 +8,7 @@ class AssetsTokenItemView: UIView {
     
     // MARK: - Properties (Public)
     
-    public var balanceSecureTextEntry: Bool = false {
+    public var balanceSecureTextEntry: Bool = WalletDefaults.shared.hiddenAsset {
         didSet {
             remainLabel.text = balanceSecureTextEntry ? "****" : balance
         }
@@ -101,7 +101,7 @@ class AssetsListView: UIView {
     public var topAreaHeight: CGFloat = 45
     public var contentEdgeInserts = UIEdgeInsets(top: 15, left: 16, bottom: 15, right: 16)
     
-    public var balanceSecureTextEntryState = false {
+    public var balanceSecureTextEntryState = WalletDefaults.shared.hiddenAsset {
         didSet {
             updateBalance()
         }
