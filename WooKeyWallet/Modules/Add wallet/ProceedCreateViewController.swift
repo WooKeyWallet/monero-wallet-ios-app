@@ -9,13 +9,10 @@ class ProceedCreateViewController: BaseViewController {
     // MARK: - Properties (Private)
     
     private let walletId: Int
-    
-    private var wallet: WalletProtocol!
-    
-    private var seedString: String? {
+        
+    private var seed: Seed? {
         didSet {
-            let text = seedString ?? ""
-            navigationItem.rightBarButtonItem?.isEnabled = text.count > 0
+            navigationItem.rightBarButtonItem?.isEnabled = !(seed?.sentence ?? "").isEmpty
         }
     }
     
@@ -107,16 +104,6 @@ class ProceedCreateViewController: BaseViewController {
         loadProceedWallet()
     }
     
-    
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if wallet != nil {
-            let vc = SeedAlertViewController()
-            vc.modalPresentationStyle = .overCurrentContext
-            present(vc, animated: false, completion: nil)
-        }
-    }
-    
     deinit {
         navigationController?.interactivePopGestureRecognizer?.isEnabled = true
     }
@@ -129,29 +116,25 @@ class ProceedCreateViewController: BaseViewController {
         LoginViewController.show(true, walletName: model.name, loginResult: { (pwd) in
             guard let pwd = pwd else { return }
             HUD.showHUD()
-            WalletService.shared.safeOperation({
-                do {
-                    self.wallet = try WalletService.shared.loginWallet(model.name, password: pwd)
-                    let seed = self.wallet.seed
-                    DispatchQueue.main.async {
-                        HUD.hideHUD()
-                        if let seed = seed {
-                            self.seedString = seed.sentence
+            WalletService.shared.openWallet(model.name, password: pwd) { (result) in
+                DispatchQueue.main.async {
+                    HUD.hideHUD()
+                    switch result {
+                    case .success(let wallet):
+                        if let seed = wallet.seed {
+                            wallet.close()
+                            self.seed = seed
                             self.wordListView.configure(seed.words)
                             self.scrollView.resizeContentLayout()
                             self.confirmBtn.isEnabled = true
                             let vc = SeedAlertViewController()
-                            vc.modalPresentationStyle = .overCurrentContext
                             self.present(vc, animated: false, completion: nil)
                         }
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        HUD.hideHUD()
+                    case .failure(_):
                         HUD.showError(LocalizedString(key: "loadFail", comment: ""))
                     }
                 }
-            })
+            }
         })
     }
     
@@ -159,12 +142,13 @@ class ProceedCreateViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func copyAction() {
-        UIPasteboard.general.string = seedString
+        UIPasteboard.general.string = seed?.sentence
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
     
     @objc private func confirmAction() {
-        let vc = SeedVerifyViewController.init(seed: wallet.seed!)
+        guard let seed = self.seed else { return }
+        let vc = SeedVerifyViewController.init(seed: seed)
         navigationController?.pushViewController(vc, animated: true)
     }
 

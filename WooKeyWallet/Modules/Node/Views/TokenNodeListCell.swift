@@ -46,6 +46,7 @@ class TokenNodeListCell: BaseTableViewCell {
         nameLabel.text = model.node
         if let fps = model.fps {
             detailLabel.text = "\(fps) ms"
+            detailLabel.textColor = fps < 2000 ? UIColor(hex: 0x26B479) : UIColor.red
         } else {
             detailLabel.text = ""
         }

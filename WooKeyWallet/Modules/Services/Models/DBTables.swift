@@ -155,6 +155,7 @@ class _Transaction_: TableCodable {
     var paymentId: String = ""
     var hash: String = ""
     var block: String = ""
+    var label: String = ""
     
     enum CodingKeys: String, CodingTableKey {
         typealias Root = _Transaction_
@@ -175,6 +176,7 @@ class _Transaction_: TableCodable {
         case paymentId
         case hash
         case block
+        case label
     }
     
     var isAutoIncrement: Bool = true
@@ -191,7 +193,8 @@ extension _Transaction_ {
                            fee: fee,
                            paymentId: paymentId,
                            hash: hash,
-                           block: block)
+                           block: block,
+                           label: label)
     }
     
     class func from(_ value: Transaction, walletId: Int) -> _Transaction_ {
@@ -206,6 +209,7 @@ extension _Transaction_ {
         model.paymentId = value.paymentId
         model.hash = value.hash
         model.block = value.block
+        model.label = value.label
         return model
     }
 }

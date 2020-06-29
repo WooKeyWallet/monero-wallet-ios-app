@@ -41,7 +41,7 @@ open class ZZDatePicker: UIViewController {
         self.init()
         self.mode = mode
         self.date = mode.date
-        modalPresentationStyle = .overCurrentContext
+        self.modalPresentationStyle = .overCurrentContext
     }
     
     public override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?) {

@@ -11,7 +11,7 @@ class SettingsViewModel: NSObject {
     private lazy var itemGroup: [[SettingsItemType]] = {
         return [
             [.wallet, .token,],
-            [.node, .lang,],
+            [.node, .lang, .markets,],
             [.help, .about,],
         ]
     }()
@@ -38,6 +38,8 @@ class SettingsViewModel: NSObject {
                 text = "简体中文"
             }
             return SettingsItem.init(icon: UIImage(named: "settings.lang"), name: LocalizedString(key: "settings.lang", comment: ""), text: text)
+        case .markets:
+            return SettingsItem(icon: UIImage(named: "settings.markets"), name: LocalizedString(key: "settings.markets", comment: ""), text: "")
         case .help:
             return SettingsItem.init(icon: UIImage(named: "settings.help"), name: LocalizedString(key: "settings.help", comment: ""), text: "")
         case .about:
@@ -69,6 +71,8 @@ class SettingsViewModel: NSObject {
             return WalletManagementViewController()
         case .lang:
             return LanguageViewController()
+        case .markets:
+            return MarketsViewController()
         case .about:
             return AboutViewController()
         case .help:

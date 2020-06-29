@@ -37,6 +37,12 @@
 "none" = "None";
 "scan" = "Scan";
 "photos" = "Photos";
+"save" = "Save";
+"tagNull" = "None";
+"deleteConfirm" = "Confirm";
+"reset" = "Reset";
+"tips" = "Reminder";
+"usePassword" = "Use Password";
 
 "publicViewKey" = "Public View Key";
 "secretViewKey" = "Private View Key";
@@ -77,8 +83,7 @@
 "wallet.import.tokenSelect" = "Select Asset";
 "wallet.import.fromWords" = "From Mnemonic Words";
 "wallet.import.fromKeys" = "From Private Key";
-"wallet.import.blockTips.msg" = "If you don't set date or height, it may take several hours to sync.
-";
+"wallet.import.blockTips.msg" = "If you don't set date or height, it may take several hours to sync.";
 "wallet.import.blockTips.cancel" = "Back to set";
 "wallet.import.blockTips.confirm" = "Continue";
 
@@ -93,6 +98,7 @@
 "settings.token" = "Address Book";
 "settings.node" = "Node";
 "settings.lang" = "Language";
+"settings.markets" = "Markets";
 "settings.help" = "Contact Us";
 "settings.about" = "About WooKey";
 "settings.node.suffix" = " Node";
@@ -135,7 +141,6 @@
 "assets.sync.progress.preffix" = "Syncing, blocks remaining:";
 "assets.sync.failure" = "Sync failed";
 "assets.prefix" = "Assets";
-
 "assets.records.nodata" = "No Transaction Records";
 
 "send.amount.remain" = "Available Balance";
@@ -152,6 +157,7 @@
 "transaction.amount.prefix" = "Amount:";
 "transaction.fee.prefix" = "Fee:";
 "transaction.direction.prefix" = "Type:";
+"transaction.label.prefix" = "Address Label:";
 
 "transaction.status.success" = "Transaction Success";
 "transaction.status.fail" = "Transaction Failure";
@@ -195,6 +201,7 @@
 "wallet.detail.pwd.tips" = "Password Hint";
 "wallet.detail.import.seed" = "Export Mnemonic Words";
 "wallet.detail.import.keys" = "Export Private Key";
+"wallet.detail.localAuth" = "Biometrics Lock/Gesture Password";
 "wallet.detail.import.error" = "Failed to Export";
 "wallet.detail.import.keys.tips" = "There is a security risk when you export private keys in an unencrypted format.";
 
@@ -205,3 +212,37 @@
 "blockHeight.tips" = "* It is highly recommended to fill Block Height or Recent Transaction Date to speed up Sync";
 
 "transaction.block.url" = "Go to explorer for more details>";
+
+"addressbook.edit.title" = "Edit Note";
+"addressbook.edit.placeholder" = "Please enter address note";
+
+"auth.options.title" = "Select one or more scenes";
+"auth.options.openWallet" = "Open wallet";
+"auth.options.sendXMR" = "Send XMR";
+"auth.options.exportKeys" = "Export private key and seed";
+
+"gesture.pwdSet.title" = "Set Gesture Password";
+"gesture.pwdReset.title" = "Change gesture password";
+"gesture.pwd.setup" = "Draw unlock pattern";
+"gesture.pwd.setup2" = "Draw unlock pattern again";
+"gesture.pwd.vertify" = "Enter the gesture";
+"gesture.oldPwd.vertify" = "Enter the original gesture";
+"gesture.pwd.error.confirm" = "Inconsistent with the last drawing, please redraw";
+"gesture.pwd.error.count" = "Incorrect password, $0 remaining attempts";
+"gesture.pwd.error.length" = "A pattern should connect at least 4 dots, please redraw";
+"localAuth.biometry" = "Biometrics Lock";
+"localAuth.style" = "Select Unlock Method";
+"localAuth.gesture" = "Gesture Password";
+"localAuth.gesture.modify" = "Change gesture";
+"localAuth.verify" = "Please use Touch ID to unlock";
+"setup.success" = "Success";
+
+"localAuth.security.title" = "Risk warning and disclaimer";
+"localAuth.security.tips" = "1. The security of the Face ID/Touch ID/Gesture depends on users' mobile devices, not WooKey \n2. Do not enable these functions for wallets with large amounts of assets\n3. WooKey shall not be liable for the loss of assets caused by biometric vulnerabilities or the loss of mobile devices or the loss of files";
+"localAuth.pwdClosing.tips" = "Disable this feature, WooKey will clear all password related data. You should set up again to enable this feature.";
+"localAuth.pwdOnly.tips" = "Face ID/Touch ID and gesture cannot be activated at the same time";
+
+"passcodeNotSet" = "Password is disabled in your mobile device, biometrics lock cannot be activated";
+"biometryNotAvailable" = "Please enable biometric lock in your mobile device and try again";
+"biometryNotEnrolled" = "Unable to activate, you should set up biometrics in your mobile device first";
+"biometryLockout" = "Too many failed attempts, please enter password";

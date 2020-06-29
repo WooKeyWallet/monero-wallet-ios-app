@@ -10,6 +10,7 @@ public enum SettingsItemType {
     case token   // 地址簿
     case node    // 节点设置
     case lang    // 语言
+    case markets // 行情
     case help    // 帮助中心
     case about   // 关于我们
 }

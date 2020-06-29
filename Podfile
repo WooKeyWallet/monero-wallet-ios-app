@@ -14,7 +14,9 @@ target 'WooKeyWallet' do
   pod 'IQKeyboardManagerSwift'
   pod 'WCDB.swift'
   pod 'SVProgressHUD'
-
+  pod 'SwiftyRSA'
+  pod 'Gifu'
+  pod 'SwipeCellKit'
   
 
 end

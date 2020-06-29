@@ -92,7 +92,6 @@ class ExportWalletSeedViewController: BaseViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         let vc = SeedAlertViewController()
-        vc.modalPresentationStyle = .overCurrentContext
         present(vc, animated: false, completion: nil)
     }
     
@@ -101,28 +100,24 @@ class ExportWalletSeedViewController: BaseViewController {
     
     private func openWallet(_ name: String, pwd: String) {
         HUD.showHUD()
-        WalletService.shared.safeOperation {
-            do {
-                let wallet = try WalletService.shared.loginWallet(name, password: pwd)
-                if let seed = wallet.seed {
-                    DispatchQueue.main.async {
-                        HUD.hideHUD()
-                        self.seedString = seed.sentence
-                        self.wordListView.configure(seed.words)
-                        self.scrollView.resizeContentLayout()
-                    }
-                } else {
-                    DispatchQueue.main.async {
-                        HUD.hideHUD()
-                        HUD.showError(LocalizedString(key: "wallet.detail.import.error", comment: ""))
-                    }
-                }
-                wallet.lock()
-            } catch {
-                DispatchQueue.main.async {
-                    HUD.hideHUD()
+        WalletService.shared.openWallet(name, password: pwd) { (result) in
+            var walletSeed: Seed?
+            switch result {
+            case .success(let wallet):
+                walletSeed = wallet.seed
+                wallet.close()
+            case .failure(_):
+                break
+            }
+            DispatchQueue.main.async {
+                HUD.hideHUD()
+                guard let seed = walletSeed else {
                     HUD.showError(LocalizedString(key: "wallet.detail.import.error", comment: ""))
+                    return
                 }
+                self.seedString = seed.sentence
+                self.wordListView.configure(seed.words)
+                self.scrollView.resizeContentLayout()
             }
         }
     }

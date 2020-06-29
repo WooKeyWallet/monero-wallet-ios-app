@@ -104,19 +104,15 @@ class AddWalletViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func createWalletAction() {
-        var model = WalletCreate()
-        model.mode = .new
-        toCreateWallet(model)
+        toCreateWallet(.new(data: .empty))
     }
     
     @objc private func importWalletAction() {
-        var model = WalletCreate()
-        model.mode = .recovery
-        toCreateWallet(model)
+        toCreateWallet(.recovery(data: .empty, recover: .empty))
     }
     
-    private func toCreateWallet(_ model: WalletCreate) {
-        let viewModel = CreateWalletViewModel(create: model)
+    private func toCreateWallet(_ style: CreateWalletStyle) {
+        let viewModel = CreateWalletViewModel(style: style)
         let vc = CreateWalletViewController(viewModel: viewModel)
         navigationController?.pushViewController(vc, animated: true)
     }

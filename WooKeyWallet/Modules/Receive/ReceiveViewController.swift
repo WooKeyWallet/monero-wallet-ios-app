@@ -24,7 +24,7 @@ class ReceiveViewController: BaseViewController {
     
     // MARK: - Life Cycles
     
-    init(token: TokenWallet, wallet: WalletProtocol) {
+    init(token: TokenWallet, wallet: XMRWallet) {
         self.viewModel = ReceiveViewModel.init(token: token, wallet: wallet)
         super.init()
     }
@@ -85,8 +85,14 @@ class ReceiveViewController: BaseViewController {
                 _Self.receiveView.addressView.text = text
                 _Self.scrollView.resizeContentLayout()
             }
+            viewModel.addressLabelState.observe(self) { (label, SELF) in
+                SELF.receiveView.addressLabel.text = label
+            }
             viewModel.qrcodeState.observe(receiveView.qrcodeView) { (qrcode, imageView) in
                 imageView.image = qrcode
+            }
+            viewModel.qrcodeLoading.observe(receiveView.qrcodeView) { (loading, qrcodeView) in
+                loading ? qrcodeView.showIndicator() : qrcodeView.hideIndicator()
             }
             viewModel.paymentIdState.observe(self) { (text, _Self) in
                 _Self.receiveView.paymentIdField.text = text

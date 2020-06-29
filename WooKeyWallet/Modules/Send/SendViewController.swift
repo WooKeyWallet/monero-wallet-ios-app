@@ -27,7 +27,7 @@ class SendViewController: BaseViewController {
     
     // MARK: - Life Cycles
     
-    required init(asset: Assets, wallet: WalletProtocol) {
+    required init(asset: Assets, wallet: XMRWallet) {
         self.viewModel = SendViewModel.init(asset: asset, wallet: wallet)
         super.init()
     }

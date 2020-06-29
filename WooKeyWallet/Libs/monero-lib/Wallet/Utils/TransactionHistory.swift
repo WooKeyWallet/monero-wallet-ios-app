@@ -35,14 +35,37 @@ public struct TransactionItem {
         self.direction = direction
         self.isPending = isPending
         self.isFailed = isFailed
-        self.amount = xmr_displayAmount(amount)
-        self.networkFee = xmr_displayAmount(networkFee)
+        self.amount = MoneroWalletWrapper.displayAmount(amount)
+        self.networkFee = MoneroWalletWrapper.displayAmount(networkFee)
         self.timestamp = timestamp
         self.confirmations = confirmations
         self.paymentId = paymentId
         self.hash = hash
         self.label = label
         self.blockHeight = blockHeight
+        self.token = "XMR"
+    }
+    
+    public init(model: MoneroTrxHistory)
+    {
+        switch model.direction {
+        case .in:
+            self.direction = .received
+        case .out:
+            self.direction = .sent
+        @unknown default:
+            fatalError()
+        }
+        self.isPending = model.isPending
+        self.isFailed = model.isFailed
+        self.amount = MoneroWalletWrapper.displayAmount(model.amount)
+        self.networkFee = MoneroWalletWrapper.displayAmount(model.fee)
+        self.timestamp = UInt64(model.timestamp)
+        self.confirmations = model.confirmations
+        self.paymentId = model.paymentId
+        self.hash = model.hashValue
+        self.label = model.label
+        self.blockHeight = model.blockHeight
         self.token = "XMR"
     }
 }

@@ -3,4 +3,4 @@
 //
 
 #import "JVFloatLabeledTextView.h"
-#include "moneroWrapper.h"
+#import "MoneroWalletWrapper.h"

@@ -71,7 +71,7 @@ class SendConfirmViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func confirmAction() {
-        LoginViewController.show(walletName: viewModel.walletName) { [unowned self] (pwd) in
+        LoginViewController.loginWithOptions(.sendXMR, walletName: viewModel.walletName) { [unowned self] (pwd) in
             guard let _ = pwd else { return }
             self.viewModel.commitTransaction()
         }

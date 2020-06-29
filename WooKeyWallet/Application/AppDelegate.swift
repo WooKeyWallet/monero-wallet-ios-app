@@ -47,6 +47,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
             // global
             DispatchQueue.global().async {
+                KeyChain.configure()
                 DBService.shared.setup()
             }
         }

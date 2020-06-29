@@ -85,29 +85,24 @@ class TokenNodeListViewModel: NSObject {
     }
     
     private func verifyNodeURI(_ host_port: String, callBack: ((Int?) -> Void)?) {
+        let startTime = CFAbsoluteTimeGetCurrent()
         let url = "http://" + host_port + "/json_rpc"
         let param = ["jsonrpc": "2.0", "id": "0", "method": "getlastblockheader"]
-        let dataTask = SessionManager.default.request(url, method: .post, parameters: param, encoding: JSONEncoding.default, headers: nil)
-        dataTask.responseJSON { (response: DataResponse<Any>) in
-            let statusCode = response.response?.statusCode ?? 404
-            let contentLen = response.data?.count ?? 0
-            var resultVaild = false
-            if statusCode == 200 && contentLen < 1000 {
-                let json = response.value as? [String: Any] ?? [:]
-                let result = json["result"] as? [String: Any] ?? [:]
-                let header = result["block_header"] as? [String: Any] ?? [:]
-                let timestamp = header["timestamp"] as? CLong
-                if timestamp != nil {
-                    resultVaild = true
-                }
-            }
-            if resultVaild {
-                callBack?(Int(response.timeline.requestDuration * 1000))
+        let dataTask = Session.default.request(url, method: .post, parameters: param, encoding: JSONEncoding.default, headers: nil)
+        dataTask.responseJSON { (response) in
+            if let json = response.value as? [String: Any],
+                let result = json["result"] as? [String: Any],
+                let header = result["block_header"] as? [String: Any],
+                let timestamp = header["timestamp"] as? Int,
+                timestamp > 0
+            {
+                let endTime = CFAbsoluteTimeGetCurrent()
+                callBack?(Int((endTime - startTime) * 1000))
             } else {
                 callBack?(nil)
             }
         }
-        DispatchQueue.main.asyncAfter(deadline: .now()+3) {
+        DispatchQueue.main.asyncAfter(deadline: .now()+5) {
             dataTask.cancel()
         }
     }
@@ -177,7 +172,6 @@ class TokenNodeListViewModel: NSObject {
     
     public func toAddNodeViewController() -> UIViewController {
         let vc = AddNodeForTokenController.init(viewModel: self)
-        vc.modalPresentationStyle = .overCurrentContext
         return vc
     }
     

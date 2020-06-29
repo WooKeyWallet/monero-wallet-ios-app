@@ -70,7 +70,7 @@ class TransactionDetailBasicInfoView: UIView {
     // MARK: - Properties (Lazy)
     
     public lazy var titleLabels: [UILabel] = {
-        return (0...4).map({ _ in
+        return (0...5).map({ _ in
             let label = UILabel()
             label.textColor = AppTheme.Color.text_light
             label.font = AppTheme.Font.text_small
@@ -79,7 +79,7 @@ class TransactionDetailBasicInfoView: UIView {
     }()
     
     public lazy var contentLabels: [UILabel] = {
-        return (0...4).map({ _ in
+        return (0..<titleLabels.count).map({ _ in
             let label = UILabel()
             label.textColor = AppTheme.Color.text_dark
             label.font = AppTheme.Font.text_small
@@ -114,30 +114,30 @@ class TransactionDetailBasicInfoView: UIView {
     }
     
     internal func configureConstraints() {
-        stride(from: 0, to: 5, by: 1).forEach { (i) in
+        stride(from: 0, to: titleLabels.count, by: 1).forEach { (i) in
             let titleLabel = titleLabels[i]
             let contentLabel = contentLabels[i]
             contentLabel.setContentHuggingPriority(UILayoutPriority.init(1), for: .horizontal)
             titleLabel.setContentHuggingPriority(UILayoutPriority.init(700), for: .horizontal)
             titleLabel.snp.makeConstraints({ (make) in
-                make.left.equalToSuperview()
+                make.left.equalTo(0)
                 make.top.equalTo(contentLabel)
-            })
-            if i == 0 {
-                contentLabel.snp.makeConstraints({ (make) in
-                    make.top.right.equalToSuperview()
-                    titleLabels.forEach({ make.left.greaterThanOrEqualTo($0.snp.right).offset(12) })
-                })
-            } else {
-                contentLabel.snp.makeConstraints({ (make) in
-                    titleLabels.forEach({ make.left.greaterThanOrEqualTo($0.snp.right).offset(12) })
-                    make.left.right.equalTo(contentLabels[i-1])
-                    make.top.equalTo(contentLabels[i-1].snp.bottom).offset(14)
-                    if i == 4 {
-                        make.bottom.equalToSuperview()
+                if i > 0 {
+                    make.width.equalTo(titleLabels[i-1])
+                    if i == titleLabels.count - 1 {
+                        make.bottom.equalTo(0)
                     }
-                })
-            }
+                }
+            })
+            contentLabel.snp.makeConstraints({ (make) in
+                if i == 0 {
+                    make.top.equalTo(0)
+                } else {
+                    make.top.equalTo(contentLabels[i-1].snp.bottom).offset(14)
+                }
+                make.left.equalTo(titleLabel.snp.right).offset(12)
+                make.right.lessThanOrEqualTo(0)
+            })
         }
     }
     
@@ -382,23 +382,32 @@ class TransactionDetailView: UIView {
             statusLabel.text = LocalizedString(key: "transaction.status.packaging", comment: "")
         }
         dateLabel.text = model.date
-        var direction = ""
+        var titles = [
+            LocalizedString(key: "transaction.amount.prefix", comment: ""),
+            LocalizedString(key: "transaction.fee.prefix", comment: ""),
+            LocalizedString(key: "transaction.direction.prefix", comment: ""),
+            LocalizedString(key: "transaction.label.prefix", comment: ""),
+            "Payment ID:",
+        ]
+        var strs = [
+            Helper.displayDigitsAmount(model.amount),
+            Helper.displayDigitsAmount(model.fee),
+            "",
+            model.label,
+            model.paymentId,
+        ]
         switch model.type {
         case .in:
-            direction = LocalizedString(key: "receive", comment: "")
+            strs[2] = LocalizedString(key: "receive", comment: "")
         case .out:
-            direction = LocalizedString(key: "send", comment: "")
+            strs[2] = LocalizedString(key: "send", comment: "")
+            titles.remove(at: 3)
+            strs.remove(at: 3)
         default:
             break
         }
-        baseInfoView.configureTitles(strs: [LocalizedString(key: "transaction.amount.prefix", comment: ""),
-                                            LocalizedString(key: "transaction.fee.prefix", comment: ""),
-                                            LocalizedString(key: "transaction.direction.prefix", comment: ""),
-                                            "Payment ID:"])
-        baseInfoView.configureContents(strs: [Helper.displayDigitsAmount(model.amount),
-                                              Helper.displayDigitsAmount(model.fee),
-                                              direction,
-                                              model.paymentId])
+        baseInfoView.configureTitles(strs: titles)
+        baseInfoView.configureContents(strs: strs)
         blockInfoView.transactionIdLabel.text = model.hash
         blockInfoView.blockIdLabel.text = model.block
         DispatchQueue.global().async {

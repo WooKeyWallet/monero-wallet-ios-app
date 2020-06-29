@@ -131,19 +131,20 @@ class WKProgressBar: UIView {
     private func addAnimation() {
         progressLayer.isHidden = true
         animateLayer.isHidden = false
+        animateLayer.anchorPoint = CGPoint(x: 0, y: 0.5)
         layer.addSublayer(animateLayer)
         
         let anim1 = CAKeyframeAnimation.init()
         anim1.keyPath = "transform.scale.x"
-        anim1.values = [1, 1.5, 2.25, 1.5, 1]
+        anim1.values = [1, 1.5, 2, 2.5, 2, 1.5, 1]
         anim1.fillMode = .forwards
         anim1.repeatCount = HUGE
         anim1.beginTime = 0
         
-        let itemW = animateLayer.bounds.size.width
+        let pw = animateLayer.bounds.size.width
         let anim2 = CAKeyframeAnimation.init()
         anim2.keyPath = "position.x"
-        anim2.values = [0, itemW * 0.75, itemW * 1.875, itemW * 2.75, itemW * 4, itemW * 5]
+        anim2.values = [-pw, 0, pw, pw * 2, pw * 3, pw * 4, pw * 5]
         anim2.fillMode = .forwards
         anim2.repeatCount = HUGE
         anim2.beginTime = 0

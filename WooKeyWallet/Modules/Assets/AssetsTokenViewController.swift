@@ -121,11 +121,14 @@ class AssetsTokenViewController: BaseViewController {
         
         do //// Wallet Syncing
         {
-            WalletDefaults.shared.subAddressIndexState.observe(self) { (_, _Self) in
+            WalletDefaults.shared.subAddressIndexState.observe(self) { (subAddress, _Self) in
                 if let key = _Self.tokenAssets.wallet?.address
                 {
-                    _Self.tokenAssetsView.tokenAddress.text = WalletService.displayAddress(key)
+                    _Self.tokenAssetsView.tokenAddress.text = subAddress[key]?.address ?? key
                 }
+            }
+            viewModel.pushState.observe(self) { (viewController, SELF) in
+                SELF.navigationController?.pushViewController(viewController, animated: true)
             }
 //            viewModel.refreshState.observe(navigationItem.rightBarButtonItem!) { (enable, rightBarButtonItem) in
 //                rightBarButtonItem.isEnabled = enable
@@ -155,7 +158,7 @@ class AssetsTokenViewController: BaseViewController {
                 strongSelf.viewControllers[strongSelf.tokenTransactionsView.currentPageIndex].reloadData()
             }
             
-            viewModel.init_wallet()
+            viewModel.configure()
         }
     }
     
@@ -193,19 +196,19 @@ class AssetsTokenViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func refreshAction() {
-        navigationController?.pushViewController(viewModel.toSwitchNode(), animated: true)
+        viewModel.toSwitchNode()
     }
     
     @objc private func sendAction() {
-        navigationController?.pushViewController(viewModel.toSend(), animated: true)
+        viewModel.toSend()
     }
     
     @objc private func receiveAction() {
-        navigationController?.pushViewController(viewModel.toReceive(), animated: true)
+        viewModel.toReceive()
     }
     
     @objc private func copyAction() {
-        UIPasteboard.general.string = WalletService.displayAddress(tokenAssets.wallet?.address ?? "")
+        UIPasteboard.general.string = tokenAssets.wallet?.displayAddress()
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
 

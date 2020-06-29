@@ -20,15 +20,15 @@ class ImportWalletViewModel: NSObject {
     
     // MARK: - Properties (Private)
     
-    private let create: WalletCreate
+    private let data: NewWallet
     
-    private var recovery_seed = WalletRecovery(from: .seed)
-    private var recovery_keys = WalletRecovery(from: .keys)
+    private var recovery_seed = RecoverWallet(from: .seed)
+    private var recovery_keys = RecoverWallet(from: .keys)
     
     // MARK: - Life Cycles
     
-    init(create: WalletCreate) {
-        self.create = create
+    init(data: NewWallet) {
+        self.data = data
         super.init()
     }
 
@@ -86,24 +86,21 @@ class ImportWalletViewModel: NSObject {
     }
     
     public func recoveryFromSeed() {
-        var create = self.create
-        create.recovery = self.recovery_seed
-        self.alertWarningIfNeed(create)
+        self.alertWarningIfNeed(recovery_seed)
     }
     
     public func recoveryFromKeys() {
-        var create = self.create
-        create.recovery = self.recovery_keys
-        self.alertWarningIfNeed(create)
+        self.alertWarningIfNeed(recovery_keys)
     }
+    
     
     // MARK: - Methods (Private)
     
-    private func alertWarningIfNeed(_ create: WalletCreate) {
-        guard create.recovery?.date == nil &&
-            create.recovery?.block == nil
+    private func alertWarningIfNeed(_ recover: RecoverWallet) {
+        guard recover.date == nil &&
+            recover.block == nil
         else {
-            self.createWallet(create)
+            self.createWallet(recover)
             return
         }
         
@@ -115,7 +112,7 @@ class ImportWalletViewModel: NSObject {
         
         let confirmAction = UIAlertAction(title: LocalizedString(key: "wallet.import.blockTips.confirm", comment: ""), style: .destructive) {
         [unowned self] (_) in
-            self.createWallet(create)
+            self.createWallet(recover)
         }
         
         alert.addAction(confirmAction)
@@ -124,28 +121,28 @@ class ImportWalletViewModel: NSObject {
         showAlertState.newState(alert)
     }
     
-    private func createWallet(_ create: WalletCreate) {
+    private func createWallet(_ recover: RecoverWallet) {
         HUD.showHUD()
-        WalletService.shared.safeOperation {
-            do {
-                let _ = try WalletService.shared.createWallet(create)
-                WalletService.shared.createFinish()
-                DispatchQueue.main.async {
-                    HUD.hideHUD()
-                    if
-                        let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController,
-                        let _ = navigationController.viewControllers.first as? UITabBarController
+        WalletService.shared.createWallet(with: .recovery(data: data, recover: recover)) { (result) in
+            DispatchQueue.main.async {
+                HUD.hideHUD()
+                switch result {
+                case .success(let wallet):
+                    wallet.close()
+                    do // 刷新 UI
                     {
-                        guard let managementVC = navigationController.viewControllers[1] as? WalletManagementViewController else { return }
-                        managementVC.loadData()
-                        navigationController.popToViewController(managementVC, animated: true)
-                    } else {
-                        AppManager.default.rootIn()
+                        if let navigationController = UIApplication.shared.keyWindow?.rootViewController as? UINavigationController,
+                            navigationController.viewControllers.first is UITabBarController,
+                            navigationController.viewControllers.count > 2,
+                            let managementVC = navigationController.viewControllers[1] as? WalletManagementViewController
+                        {
+                            managementVC.loadData()
+                            navigationController.popToViewController(managementVC, animated: true)
+                        } else {
+                            AppManager.default.rootIn()
+                        }
                     }
-                }
-            } catch {
-                DispatchQueue.main.async {
-                    HUD.hideHUD()
+                case .failure(_):
                     HUD.showError("导入失败")
                 }
             }

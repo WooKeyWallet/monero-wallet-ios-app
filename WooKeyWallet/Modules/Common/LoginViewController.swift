@@ -70,7 +70,6 @@ class LoginViewController: BaseViewController {
             contentView.titleStatusView.backgroundColor = AppTheme.Color.status_green
             contentView.titleLabel.text = LocalizedString(key: "send.confirm.pwd.title", comment: "")
             contentView.confirmBtn.setTitle(LocalizedString(key: "confirm", comment: ""), for: .normal)
-            contentView.cancelBtn.isHidden = false
             
             // textView
             pwdBG.addSubview(textView)
@@ -110,10 +109,62 @@ class LoginViewController: BaseViewController {
     
     // MARK: - Methods (Public)
     
-    public class func show(_ cancelHidden: Bool = true, walletName: String, loginResult: ((String?) -> Void)?) {
+    public class func loginWithOptions(_ options: LocalAuthOptions, walletName: String, loginResult: ((String?) -> Void)?) {
+        let storage = WalletDefaults(wallet: walletName)
+        if storage.localAuthOptions.contains(options) && (storage.hasFaceOrTouchID || storage.hasGesturePassword) {
+            if storage.hasFaceOrTouchID {
+                LocalAuth.default.evaluatePolicy(LocalizedString(key: LocalizedString(key: "localAuth.verify", comment: ""), comment: "")) { (result) in
+                    switch result {
+                    case .success:
+                        if let rsaPwd = KeyChain.string(forKey: walletName) {
+                            loginResult?(RSA(decrypt: rsaPwd).string)
+                        } else {
+                            loginResult?(nil)
+                        }
+                    case .failure(let error):
+                        switch error {
+                        case .passcodeNotSet:
+                            HUD.showError(LocalizedString(key: "passcodeNotSet", comment: ""))
+                        case .biometryNotAvailable:
+                            HUD.showError(LocalizedString(key: "biometryNotAvailable", comment: ""))
+                        case .biometryNotEnrolled:
+                            HUD.showError(LocalizedString(key: "biometryNotEnrolled", comment: ""))
+                        case .biometryLockout:
+                            HUD.showError(LocalizedString(key: "biometryLockout", comment: ""))
+                        default: break
+                        }
+                        switch error {
+                        case .authenticationFailed, .userFallback, .passcodeNotSet, .biometryLockout, .biometryNotAvailable, .biometryNotEnrolled:
+                            self.show(walletName: walletName, loginResult: loginResult)
+                        default: break
+                        }
+                    }
+                }
+            } else {
+                let passwordManager = LocalAuthGesturePassword(walletName) { (result) in
+                    switch result {
+                    case .success:
+                        if let rsaPwd = KeyChain.string(forKey: walletName) {
+                            loginResult?(RSA(decrypt: rsaPwd).string)
+                        } else {
+                            loginResult?(nil)
+                        }
+                    case .failure:
+                        self.show(walletName: walletName, loginResult: loginResult)
+                    }
+                }
+                let vc = GesturePwdViewController(type: .vertify, passwordManager: passwordManager)
+                let nvc = NavigationController(rootViewController: vc)
+                UIApplication.shared.keyWindow?.rootViewController?.present(nvc, animated: true, completion: nil)
+            }
+        } else {
+            show(walletName: walletName, loginResult: loginResult)
+        }
+    }
+    
+    public class func show(_ cancelHidden: Bool = false, walletName: String, loginResult: ((String?) -> Void)?) {
         let vc = self.init(walletName)
         vc.loginHandler = loginResult
-        vc.modalPresentationStyle = .overCurrentContext
         vc.contentView.cancelBtn.isHidden = cancelHidden
         UIApplication.shared.keyWindow?.rootViewController?.present(vc, animated: false, completion: nil)
     }

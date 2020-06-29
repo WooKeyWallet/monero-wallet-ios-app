@@ -13,9 +13,7 @@ class SeedViewController: BaseViewController {
     
     // MARK: - Properties (Private)
     
-    private let wallet: WalletProtocol
-    private let create: WalletCreate
-    
+    private let seed: Seed?
     
     private var seedString: String? {
         didSet {
@@ -53,9 +51,8 @@ class SeedViewController: BaseViewController {
     
     // MARK: - Life Cycles
     
-    required init(wallet: WalletProtocol, create: WalletCreate) {
-        self.wallet = wallet
-        self.create = create
+    required init(seed: Seed?) {
+        self.seed = seed
         super.init()
     }
     
@@ -116,7 +113,7 @@ class SeedViewController: BaseViewController {
         
         do /// Models ->
         {
-            if let seed = wallet.seed {
+            if let seed = self.seed {
                 seedString = seed.sentence
                 wordListView.configure(seed.words)
                 scrollView.resizeContentLayout()
@@ -128,7 +125,6 @@ class SeedViewController: BaseViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         let vc = SeedAlertViewController()
-        vc.modalPresentationStyle = .overCurrentContext
         present(vc, animated: false, completion: nil)
     }
     
@@ -144,7 +140,7 @@ class SeedViewController: BaseViewController {
     }
     
     @objc private func confirmAction() {
-        guard let seed = wallet.seed else { return }
+        guard let seed = self.seed else { return }
         let vc = SeedVerifyViewController.init(seed: seed)
         navigationController?.pushViewController(vc, animated: true)
     }

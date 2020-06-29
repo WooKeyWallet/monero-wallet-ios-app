@@ -87,7 +87,7 @@ class AppManager: NSObject {
         else {
             return
         }
-        UIApplication.shared.openURL(_URL)
+        UIApplication.shared.open(_URL)
     }
     
     /**

@@ -13,248 +13,229 @@ public enum XMRWalletError: Error {
 }
 
 
-func xmr_displayAmount(_ value: UInt64) -> String {
-    return String(cString: monero_displayAmount(value))
+private func xmr_path(with name: String) -> String {
+    let allPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
+    let documentDirectory = allPaths[0]
+    let documentPath = documentDirectory + "/"
+    let pathWithFileName = documentPath + name
+    print("### WALLET LOCATION: \(pathWithFileName)")
+    return pathWithFileName
 }
+
+
 
 public class XMRWallet {
     
-    fileprivate var walletName: String
+    // MARK: - Properties (public)
     
-    private var listenerHandler: (() -> Void)?
-    private var newBlockHandler: ((UInt64,  UInt64) -> Void)?
+    public let walletName: String
     
     
-    public init(walletName: String)
-    {
-        self.walletName = walletName
+    // MARK: - Properties (private)
+    
+    private let language: String
+    private let walletWrapper: MoneroWalletWrapper
+    private let safeQueue: DispatchQueue
+    
+    private var isClosing = false
+    private var isSaving = false
+    private var isClosed = false
+    
+    private var needSaveOnTerminate = false
+    
+    private var didEnterBackground: NSObjectProtocol?
+    private var willTerminate: NSObjectProtocol?
+    
+    
+    // MARK: - Life Cycles
+    
+    public init(walletWrapper: MoneroWalletWrapper) {
+        self.language = "English"
+        self.walletWrapper = walletWrapper
+        self.walletName = walletWrapper.name
+        self.safeQueue = DispatchQueuePool.shared["XMRWallet:" + walletName]
     }
+    
+    public func saveOnTerminate() {
+        guard !needSaveOnTerminate else {
+            return
+        }
+        needSaveOnTerminate = true
+        let saveOnAppTerminateHandler = { [weak self] (notification: Notification) in
+            guard let SELF = self else { return }
+            SELF.save()
+        }
+        didEnterBackground = NotificationCenter.default.addObserver(forName: UIApplication.didEnterBackgroundNotification, object: nil, queue: nil, using: saveOnAppTerminateHandler)
+        willTerminate = NotificationCenter.default.addObserver(forName: UIApplication.willTerminateNotification, object: nil, queue: nil, using: saveOnAppTerminateHandler)
+    }
+    
+    public func connectToDaemon(address: String, refresh: @escaping MoneroWalletRefreshHandler, newBlock: @escaping MoneroWalletNewBlockHandler) -> Bool {
+        return walletWrapper.connect(toDaemon: address, refresh: refresh, newBlock: newBlock)
+    }
+    
+    public func connectToDaemon(address: String, delegate: MoneroWalletDelegate, result: @escaping (Bool) -> Void) {
+        safeQueue.async {
+            result(self.walletWrapper.connect(toDaemon: address, delegate: delegate))
+        }
+    }
+    
+    public func setDelegate(_ delegate: MoneroWalletDelegate) {
+        walletWrapper.setDelegate(delegate)
+    }
+    
+    public func pasue() {
+        walletWrapper.pauseRefresh()
+    }
+    
+    public func start() {
+        walletWrapper.startRefresh()
+    }
+    
+    public func close() {
+        guard !isClosed else {
+            return
+        }
+        if needSaveOnTerminate {
+            self.save()
+        }
+        self.isClosing = true
+        safeQueue.async {
+            if self.walletWrapper.close() {
+                self.isClosing = false
+                self.isClosed = true
+            } else {
+                Thread.sleep(forTimeInterval: 0.2)
+                self.close()
+            }
+        }
+    }
+    
+    public func save() {
+        guard !isClosing || !isSaving else {
+            return
+        }
+        self.isSaving = true
+        safeQueue.async {
+            self.walletWrapper.save()
+            self.isSaving = false
+        }
+    }
+    
+    public func createPendingTransaction(_ dstAddress: String, paymentId: String, amount: String) -> Bool {
+        return walletWrapper.createTransaction(toAddress: dstAddress, paymentId: paymentId, amount: amount, mixinCount: 10, priority: .default)
+    }
+    
+    public func createSweepTransaction(_ dstAddress: String, paymentId: String) -> Bool {
+        return walletWrapper.createSweepTransaction(toAddress: dstAddress, paymentId: paymentId, mixinCount: 10, priority: .default)
+    }
+
+    public func commitPendingTransaction() -> Bool {
+        return walletWrapper.commitPendingTransaction()
+    }
+    
+    public func commitPendingTransactionError() -> String {
+        return walletWrapper.transactionErrorMessage()
+    }
+    
+    public func disposeTransaction() {
+        walletWrapper.disposeTransaction()
+    }
+        
 }
 
 extension XMRWallet {
     
-    public func connectToDaemon(address: String, upperTransactionSizeLimit: UInt64,
-                                daemonUsername: String = "",
-                                daemonPassword: String = "") -> Bool
-    {
-        let status = monero_init(address, 0, daemonUsername, daemonPassword)
-        return status
-    }
-    
-    public func pasueRefresh() {
-        monero_pauseRefresh()
-    }
-    
-    public func refresh() {
-        monero_startRefresh()
-    }
-    
-    public func lock() {
-        self.listenerHandler = nil
-        self.newBlockHandler = nil
-        if !monero_closeWallet() {
-            print("========================================================================关闭失败")
-        }
-    }
-    
     public func setNewPassword(_ password: String) {
-        monero_setNewPassword(password)
+        walletWrapper.setNewPassword(password)
     }
-    
+    public var blockChainHeight: UInt64 {
+        return walletWrapper.blockChainHeight
+    }
+    public var daemonBlockChainHeight: UInt64 {
+        return walletWrapper.daemonBlockChainHeight
+    }
     public var restoreHeight: UInt64 {
-        get { return monero_getRestoreHeight() }
+        get { return walletWrapper.restoreHeight }
         set {
-            monero_setRestoreHeight(newValue)
+            walletWrapper.restoreHeight = newValue
         }
     }
-
     public var secretViewKey: String {
-        get {
-            let str = String(cString: monero_getSecretViewKey())
-            return str
-        }
+        return walletWrapper.secretViewKey
     }
-
     public var secretSpendKey: String {
-        get {
-            let str = String(cString: monero_getSecretSpendKey())
-            return str
-        }
+        return walletWrapper.secretSpendKey
     }
-    
     public var publicViewKey: String {
-        get {
-            let str = String(cString: monero_getPublicViewKey())
-            return str
-        }
+        return walletWrapper.publicViewKey
     }
     public var publicSpendKey: String {
-        get {
-            let str = String(cString: monero_getPublicSpendKey())
-            return str
-        }
+        return walletWrapper.publicSpendKey
     }
-    
     public var publicAddress: String {
-        get {
-            let str = String(cString: monero_getPublicAddress())
-            return str
-        }
+        return walletWrapper.publicAddress
     }
-    
     public var seed: Seed? {
-        get {
-            let sentence = String(cString: monero_getSeed("English"))
-            return Seed(sentence: sentence)
-        }
+        let sentence = walletWrapper.getSeedString(language)
+        return Seed(sentence: sentence)
     }
-    
     public var synchronized: Bool {
-        return monero_isSynchronized();
+        return walletWrapper.isSynchronized
     }
-
     public var balance: String {
-        return String(cString: monero_displayAmount(monero_getBalance()))
+        return displayAmount(walletWrapper.balance)
     }
-
     public var unlockedBalance: String {
-        return String(cString: monero_displayAmount(monero_getUnlockedBalance()))
+        return displayAmount(walletWrapper.unlockedBalance)
     }
     
     public var history: TransactionHistory {
         return self.getUpdatedHistory()
     }
-    
-    public func storeSycnhronized() -> Bool {
-        return monero_store(self.pathWithFileName())
-    }
 
     public func generatePaymentId() -> String {
-        return String(cString: monero_getPatmentId())
+        return MoneroWalletWrapper.generatePaymentId()
     }
 
     public func generateIntegartedAddress(_ paymentId: String) -> String {
-        return String(cString: monero_getIntegartedAddress(paymentId))
-    }
-
-    public func validAddress(_ address: String) -> Bool {
-        return monero_isValidWalletAddress(address)
+        return walletWrapper.generateIntegartedAddress(paymentId)
     }
     
+    public func addSubAddress(_ label: String, result: ((Bool) -> Void)?) {
+        safeQueue.async {
+            result?(self.walletWrapper.addSubAddress(label, accountIndex: 0))
+        }
+    }
     
-    public func addSubAddress(_ label: String) -> Bool {
-        return monero_addSubAddress(0, label)
+    public func setSubAddress(_ label: String, rowId: Int, result: ((Bool) -> Void)?) {
+        safeQueue.async {
+            result?(self.walletWrapper.setSubAddress(label, addressIndex: UInt32(rowId), accountIndex: 0))
+        }
     }
     
     public func getAllSubAddress() -> [SubAddress] {
-        guard let subAddress = monero_getAllSubAddress(),
-            let list = subAddress.pointee.list
-        else { return [] }
-        let convertArray = InteropConverter.convert(data: list, elementCount: subAddress.pointee.count)
-        var resultList = [SubAddress]()
-        for item in convertArray {
-            if let pt = item?.pointee {
-                resultList.append(SubAddress(rowId: pt.rowId, address: String(cString: pt.address), label: String(cString: pt.label)))
-            }
-        }
-        dPrint(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \(resultList)")
-        return resultList
-    }
-
-    public func createPendingTransaction(_ dstAddress: String, paymentId: String, amount: String) -> Bool {
-        return monero_createTransaction(dstAddress,
-                                        paymentId,
-                                        monero_getAmountFromString(amount),
-                                        10,
-                                        monero_pendingTransactionPriority(rawValue: 0))
-    }
-    
-    public func createSweepTransaction(_ dstAddress: String, paymentId: String) -> Bool {
-        return monero_createSweepTransaction(dstAddress, paymentId, 10, monero_pendingTransactionPriority(0))
+        let list = walletWrapper.fetchSubAddress(withAccountIndex: 0).map({SubAddress.init(model: $0)})
+        dPrint(" >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \(list)")
+        return list
     }
     
     public func getTransactionFee() -> String? {
-        let fee = monero_getTransactionFee()
+        let fee = walletWrapper.transactionFee()
         if fee < 0 {
             return nil
         }
-        return xmr_displayAmount(UInt64(fee))
-    }
-    
-    public func disposeTransaction() {
-        monero_disposeTransaction()
-    }
-
-    public func commitPendingTransaction() -> Bool {
-        return monero_commitPendingTransaction()
-    }
-    
-    public func commitPendingTransactionError() -> String {
-        return String(cString: monero_commitPendingTransactionErrorString())
+        return MoneroWalletWrapper.displayAmount(UInt64(fee))
     }
 
     public func displayAmount(_ value: UInt64) -> String {
-        return xmr_displayAmount(value)
+        return MoneroWalletWrapper.displayAmount(value)
     }
     
     private func getUpdatedHistory() -> TransactionHistory {
-
-        guard let moneroHistory = monero_getTrxHistory() else { return TransactionHistory([]) }
-        guard let transactions = moneroHistory.pointee.transactions else { return TransactionHistory([]) }
-        let numberOfTransactions = moneroHistory.pointee.numberOfTransactions
-
-        var unorderedHistory = [TransactionItem]()
-        let swiftTransactions = InteropConverter.convert(data: transactions, elementCount: Int(numberOfTransactions))
-        for swiftTransaction in swiftTransactions {
-            if let swiftTransaction = swiftTransaction?.pointee {
-                let historyItem = TransactionItem(direction: TransactionDirection(rawValue: Int(swiftTransaction.direction.rawValue))!,
-                                                  isPending: swiftTransaction.isPending,
-                                                  isFailed: swiftTransaction.isFailed,
-                                                  amount: swiftTransaction.amount,
-                                                  networkFee: swiftTransaction.fee,
-                                                  timestamp: UInt64(swiftTransaction.timestamp),
-                                                  paymentId: String(cString: swiftTransaction.paymentId),
-                                                  hash: String(cString: swiftTransaction.hash),
-                                                  label: String(cString: swiftTransaction.label),
-                                                  blockHeight: swiftTransaction.blockHeight,
-                                                  confirmations: swiftTransaction.confirmations)
-                unorderedHistory.append(historyItem)
-            }
-        }
-
-        monero_deleteHistory(moneroHistory)
-
+        let unorderedHistory = walletWrapper.fetchTransactionHistory().map({TransactionItem(model: $0)})
         // in reverse order: latest to oldest
         let list = unorderedHistory.sorted{ return $0.timestamp > $1.timestamp }
         return TransactionHistory(list)
-    }
-    
-    public func setListener(listenerHandler: (() -> Void)?, newBlockHandler: ((UInt64,  UInt64) -> Void)?) {
-        self.listenerHandler = listenerHandler
-        self.newBlockHandler = newBlockHandler
-        let handler = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        monero_registerListenerCallbacks(
-            handler,
-            { (handler) in
-                if let handler = handler {
-                    let mySelf = Unmanaged<XMRWallet>.fromOpaque(handler).takeUnretainedValue()
-                    mySelf.listenerHandler?()
-                }},
-            { (handler,currentHeight,blockChainHeight)  in
-                if let handler = handler {
-                    let mySelf = Unmanaged<XMRWallet>.fromOpaque(handler).takeUnretainedValue()
-                    mySelf.newBlockHandler?(currentHeight, blockChainHeight)
-                }}
-        )
-    }
-    
-    private func pathWithFileName() -> String {
-        let allPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
-        let documentDirectory = allPaths[0]
-        let documentPath = documentDirectory + "/"
-        let pathWithFileName = documentPath + self.walletName
-        print("### WALLET LOCATION: \(pathWithFileName)")
-        return pathWithFileName
     }
     
 }

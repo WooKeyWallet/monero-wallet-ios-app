@@ -4,117 +4,104 @@
 
 import Foundation
 
-
-public class XMRWalletBuilder {
+public struct XMRWalletBuilder {
     
-    private var walletPassword: String
-    private var walletName: String
-
-    private enum CreateMode {
-        case fromScratch
-        case fromSeed(seed: Seed)
-        case fromKeys(keys: Keys)
-        case openExisting
-    }
-    private var createMode: CreateMode?
-
-    public init()
-    {
-        self.walletPassword = ""
-        self.walletName = ""
-    }
+    // MARK: - Properties (private)
     
-    public func withPassword(_ password: String, andWalletName walletName: String) -> XMRWalletBuilder {
-        self.walletPassword = password
-        self.walletName = walletName
-        return self
+    private var language: String
+    private var name: String
+    private var password: String
+    private var mode: Mode?
+    
+    
+    // MARK: - Life Cycles
+    
+    init(name: String, password: String) {
+        self.language = "English"
+        self.name = name
+        self.password = password
     }
     
     public func fromScratch() -> XMRWalletBuilder {
-        self.createMode = .fromScratch
-        return self
+        var builder = self
+        builder.mode = .fromScratch
+        return builder
     }
     
     public func fromSeed(_ seed: Seed) -> XMRWalletBuilder {
-        self.createMode = .fromSeed(seed: seed)
-        return self
+        var builder = self
+        builder.mode = .fromSeed(seed: seed)
+        return builder
     }
     
     public func fromKeys(_ keys: Keys) -> XMRWalletBuilder {
-        self.createMode = .fromKeys(keys: keys)
-        return self
+        var builder = self
+        builder.mode = .fromKeys(keys: keys)
+        return builder
     }
     
     public func isValidatePassword() -> Bool {
-        return monero_verifyPassword(self.pathWithFileName() + ".keys", walletPassword)
+        return MoneroWalletWrapper.verifyPassword(password, path: pathWithFileName() + ".keys")
     }
     
-    public func openExisting() throws -> XMRWallet {
-        let success = self.openExistingWallet()
-        
-        if success {
-            return XMRWallet(walletName: self.walletName)
+    public func openExisting() -> XMRWallet? {
+        if let result = openExistingWallet() {
+            return XMRWallet(walletWrapper: result)
         }
-        throw XMRWalletError.openFailed
+        return nil
     }
     
-    public func generate() throws -> XMRWallet {
-        var success = false
-        
-        if let createMode = self.createMode {
-            switch createMode {
+    public func generate() -> XMRWallet? {
+        var wrapper: MoneroWalletWrapper?
+        if let mode = self.mode {
+            switch mode {
             case .openExisting:
-                success = self.openExistingWallet()
+                wrapper = self.openExistingWallet()
             case .fromScratch:
-                success = self.createWalletFromScratch()
+                wrapper = self.createWalletFromScratch()
             case .fromSeed(let seed):
-                success = self.recoverWalletFromSeed(seed)
+                wrapper = self.recoverWalletFromSeed(seed)
             case .fromKeys(let keys):
-                success = self.recoverWalletFromKeys(keys: keys)
+                wrapper = self.recoverWalletFromKeys(keys: keys)
             }
         }
-
-        if success {
-            return XMRWallet(walletName: self.walletName)
-        }
-        throw XMRWalletError.createFailed
+        guard let result = wrapper else { return nil }
+        return XMRWallet(walletWrapper: result)
     }
     
     
-    private func createWalletFromScratch() -> Bool {
-        let success = monero_createWalletFromScatch(self.pathWithFileName(),
-                                                    self.walletPassword,
-                                                    "English")
-        return success
+    // MARK: - Methods (private)
+    
+    private func createWalletFromScratch() -> MoneroWalletWrapper? {
+        return MoneroWalletWrapper.generate(withPath: pathWithFileName(), password: password, language: language)
     }
     
-    private func recoverWalletFromSeed(_ seed: Seed) -> Bool {
-        let success = monero_recoverWalletFromSeed(self.pathWithFileName(),
-                                                   seed.sentence,
-                                                   self.walletPassword)
-        return success
+    private func recoverWalletFromSeed(_ seed: Seed) -> MoneroWalletWrapper? {
+        return MoneroWalletWrapper.recover(withSeed: seed.sentence, path: pathWithFileName(), password: password)
     }
     
-    private func recoverWalletFromKeys(keys:Keys) -> Bool {
-        let success = monero_recoverWalletFromKeys(self.pathWithFileName(), self.walletPassword, "English", keys.restoreHeight, keys.addressString, keys.viewKeyString, keys.spendKeyString)
-        return success
+    private func recoverWalletFromKeys(keys:Keys) -> MoneroWalletWrapper? {
+        return MoneroWalletWrapper.recoverFromKeys(withPath: pathWithFileName(), password: password, language: language, restoreHeight: keys.restoreHeight, address: keys.addressString, viewKey: keys.viewKeyString, spendKey: keys.spendKeyString)
     }
     
-    private func openExistingWallet() -> Bool {
-        let pathWithFile = self.pathWithFileName()
-        
-        let success = monero_openExistingWallet(pathWithFile,
-                                                self.walletPassword)
-        return success
+    private func openExistingWallet() -> MoneroWalletWrapper? {
+        return MoneroWalletWrapper.openExisting(withPath: pathWithFileName(), password: password)
     }
     
     private func pathWithFileName() -> String {
         let allPaths = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)
         let documentDirectory = allPaths[0]
         let documentPath = documentDirectory + "/"
-        let pathWithFileName = documentPath + self.walletName
+        let pathWithFileName = documentPath + self.name
         return pathWithFileName
     }
-    
+}
 
+extension XMRWalletBuilder {
+    private enum Mode {
+        case fromScratch
+        case fromSeed(seed: Seed)
+        case fromKeys(keys: Keys)
+        case openExisting
+    }
 }

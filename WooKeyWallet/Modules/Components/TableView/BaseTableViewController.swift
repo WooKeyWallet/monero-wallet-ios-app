@@ -34,6 +34,7 @@ class BaseTableViewController: BaseViewController {
         tableView.estimatedSectionHeaderHeight = 0
         tableView.estimatedSectionFooterHeight = 0
         tableView.tableFooterView = UIView()
+        tableView.register(cellType: BaseTableViewCell.self)
         return tableView
     }()
     
@@ -149,9 +150,21 @@ extension BaseTableViewController: UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let row = dataSource[indexPath.section].rows[indexPath.row]
-        let cell: BaseTableViewCell = tableView.dequeueReusableCell(for: indexPath, cellType: row.cellType)
-        cell.configure(with: row)
+        let cell: UITableViewCell = tableView.dequeueReusableCell(for: indexPath, cellType: row.cellType)
+        if let cell = cell as? TableViewCellProtocol {
+            cell.configure(with: row)
+        }
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        let section = dataSource[section]
+        return section.headerTitle
+    }
+    
+    func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
+        let section = dataSource[section]
+        return section.footerTitle
     }
 }
 

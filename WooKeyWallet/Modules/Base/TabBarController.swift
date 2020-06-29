@@ -69,14 +69,22 @@ class TabBarController: UITabBarController {
         
         /// TabBar
         do {
-            self.tabBar.backgroundImage = UIImage()
-            self.tabBar.shadowImage = UIImage()
             self.tabBar.layer.shadowColor = AppTheme.Color.tabBarShadow.cgColor
             self.tabBar.layer.shadowOffset = CGSize(width: 0, height: -3)
             self.tabBar.layer.shadowRadius = 3
             self.tabBar.layer.shadowOpacity = 0.3
             self.tabBar.backgroundColor = AppTheme.Color.tabBar
             self.tabBar.tintColor = AppTheme.Color.tabBar_tintColor
+            if #available(iOS 13, *) {
+                let standardAppearance = self.tabBar.standardAppearance
+                standardAppearance.backgroundImage = UIImage.colorImage(.clear)
+                standardAppearance.shadowImage = UIImage.colorImage(.clear)
+                standardAppearance.backgroundEffect = nil
+                self.tabBar.standardAppearance = standardAppearance
+            } else {
+                self.tabBar.backgroundImage = UIImage()
+                self.tabBar.shadowImage = UIImage()
+            }
         }
         
         /// Tabs

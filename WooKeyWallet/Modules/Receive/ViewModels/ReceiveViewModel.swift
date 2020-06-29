@@ -6,7 +6,12 @@ import UIKit
 
 class ReceiveViewModel: NSObject {
     
-    // MARK: - Properties (Public)
+    // MARK: - Properties (public lazy)
+    
+    public lazy var qrcodeLoading = { Postable<Bool>() }()
+    
+    
+    // MARK: - Properties (public)
     
     public var navigationTitle: String {
         return token.token + LocalizedString(key: "receive.title.suffix", comment: "")
@@ -24,7 +29,7 @@ class ReceiveViewModel: NSObject {
     // MARK: - Properties (Private)
     
     private let token: TokenWallet
-    private let wallet: WalletProtocol
+    private let wallet: XMRWallet
     
     private var paymentIdText: String = ""
     private var integartedAddressText: String = "" {
@@ -34,7 +39,7 @@ class ReceiveViewModel: NSObject {
             }
             intergartedAddressState.value = integartedAddressText
             if integartedAddressText == "" {
-                let addr = WalletService.displayAddress(wallet.publicAddress)
+                let addr = token.displayAddress()
                 generateQRCode(addr)
             } else {
                 generateQRCode(integartedAddressText)
@@ -46,6 +51,7 @@ class ReceiveViewModel: NSObject {
     // MARK: - Properties (Lazy)
     
     lazy var qrcodeState = { Observable<UIImage?>(nil) }()
+    lazy var addressLabelState = { Observable<String>("") }()
     lazy var addressState = { Observable<String>("") }()
     lazy var paymentIdState = { Observable<String>("") }()
     lazy var intergartedAddressState = { Observable<String>("") }()
@@ -54,19 +60,21 @@ class ReceiveViewModel: NSObject {
     
     // MARK: - Life Cycle
     
-    init(token: TokenWallet, wallet: WalletProtocol) {
+    init(token: TokenWallet, wallet: XMRWallet) {
         self.token = token
         self.wallet = wallet
         super.init()
     }
     
     func configure() {
-        WalletDefaults.shared.subAddressIndexState.observe(self) { (_, _Self) in
+        WalletDefaults.shared.subAddressIndexState.observe(self) { (subAddress, _Self) in
             let key = _Self.wallet.publicAddress
-            let addr = WalletService.displayAddress(key)
+            let model = subAddress[key]
+            let addr = model?.address ?? _Self.wallet.publicAddress
             if _Self.integartedAddressText == "" {
                 _Self.generateQRCode(addr)
             }
+            _Self.addressLabelState.value = model?.label ?? LocalizedString(key: "primaryAddress", comment: "")
             guard !_Self.addressState.value.contains("*") else { return }
             _Self.addressState.value = addr
         }
@@ -77,8 +85,10 @@ class ReceiveViewModel: NSObject {
     // MARK: - Methods (Prviate)
     
     private func generateQRCode(_ content: String) {
+        qrcodeLoading.newState(true)
         Helper.generateQRCode(content: content, icon: nil) { (qrcode) in
             self.qrcodeState.value = qrcode
+            self.qrcodeLoading.newState(false)
         }
     }
     
@@ -93,7 +103,7 @@ class ReceiveViewModel: NSObject {
         }
         if text.count == 16 || text.count == 64 {
             let generatedIntegartedAddress = wallet.generateIntegartedAddress(text)
-            if wallet.validAddress(generatedIntegartedAddress) {
+            if MoneroWalletWrapper.validAddress(generatedIntegartedAddress) {
                 self.integartedAddressText = generatedIntegartedAddress
             } else {
                 self.integartedAddressText = ""
@@ -116,12 +126,12 @@ class ReceiveViewModel: NSObject {
     }
     
     public func showHideAddress(_ isHidden: Bool) {
-        let addr = WalletService.displayAddress(wallet.publicAddress)
+        let addr = token.displayAddress()
         addressState.value = !isHidden ? addr : String(addr.map({ _ in Character.init("*") }))
     }
     
     public func copyAddress() {
-        UIPasteboard.general.string = WalletService.displayAddress(wallet.publicAddress)
+        UIPasteboard.general.string = token.displayAddress()
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
     

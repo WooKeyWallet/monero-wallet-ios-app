@@ -5,3 +5,4 @@
 CFBundleDisplayName = "Monero Wallet";
 NSCameraUsageDescription = "For QR code scanning to recognize the wallet address";
 NSPhotoLibraryUsageDescription = "For QR code scanning to recognize the wallet address";
+NSFaceIDUsageDescription = "用于解锁应用、发送XMR以及导出私钥和助记词时验证";

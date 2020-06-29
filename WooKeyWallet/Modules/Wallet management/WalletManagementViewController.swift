@@ -113,8 +113,8 @@ class WalletManagementViewController: BaseViewController {
     
     // MARK: - Methods (Private)
     
-    private func toCreateWallet(_ model: WalletCreate) {
-        let viewModel = CreateWalletViewModel(create: model)
+    private func toCreateWallet(_ style: CreateWalletStyle) {
+        let viewModel = CreateWalletViewModel(style: style)
         let vc = CreateWalletViewController(viewModel: viewModel)
         navigationController?.pushViewController(vc, animated: true)
     }
@@ -123,15 +123,11 @@ class WalletManagementViewController: BaseViewController {
     // MARK: - Methods (Action)
     
     @objc private func recoveryBtnAction() {
-        var create = WalletCreate()
-        create.mode = .recovery
-        toCreateWallet(create)
+        toCreateWallet(.recovery(data: .empty, recover: .empty))
     }
     
     @objc private func createBtnAction() {
-        var create = WalletCreate()
-        create.mode = .new
-        toCreateWallet(create)
+        toCreateWallet(.new(data: .empty))
     }
     
     // MARK: - Methods (Public)

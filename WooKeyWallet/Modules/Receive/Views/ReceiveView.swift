@@ -42,8 +42,16 @@ class ReceiveView: UIView {
         return sepratorView
     }()
     
+    public lazy var addressLabel: UILabel = {
+        let label = UILabel()
+        label.font = AppTheme.Font.text_normal
+        label.textColor = AppTheme.Color.text_dark
+        return label
+    }()
+    
     public lazy var addressView: WKTextView = {
         let textView = createTextView()
+        textView.textContainerInset.top = 50
         textView.font = AppTheme.Font.text_smaller
         textView.isEditable = false
         textView.delegate = self
@@ -160,6 +168,7 @@ class ReceiveView: UIView {
         qrcodeView,
         sepratorView,
         addressView,
+        addressLabel,
         addressTipLabel,
         showHideAddrBtn,
         subAddressBtn,
@@ -215,6 +224,12 @@ class ReceiveView: UIView {
             make.left.right.equalTo(0)
             make.top.equalTo(qrcodeView.snp.bottom).offset(12)
             make.height.equalTo(3)
+        }
+        addressLabel.snp.makeConstraints { (make) in
+            make.top.equalTo(addressView)
+            make.left.equalTo(addressView).offset(10)
+            make.right.equalTo(-10)
+            make.height.equalTo(addressView.textContainerInset.top)
         }
         addressView.snp.makeConstraints { (make) in
             make.left.equalTo(15)
@@ -293,7 +308,7 @@ class ReceiveView: UIView {
     
     private func createTextView() -> WKTextView {
         let textView = WKTextView()
-        textView.textContainerInset = UIEdgeInsets(top: 10, left: 12, bottom: 30, right: 10)
+        textView.textContainerInset = UIEdgeInsets(top: 10, left: 5, bottom: 30, right: 2)
         textView.backgroundColor = AppTheme.Color.alert_textView
         textView.layer.cornerRadius = 5
         textView.layer.masksToBounds = true
@@ -303,6 +318,7 @@ class ReceiveView: UIView {
         textView.placeholderColor = AppTheme.Color.text_light
         textView.isScrollEnabled = false
         textView.textContainer.lineBreakMode = .byCharWrapping
+        textView.contentInset = .zero
         return textView
     }
     

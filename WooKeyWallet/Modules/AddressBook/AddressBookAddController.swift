@@ -131,12 +131,7 @@ class AddressBookAddController: BaseViewController {
     }
     
     @objc private func coinSelectAction() {
-        let vc = CurrencyPickerViewController.init { [unowned self] (token) in
-            self.address.symbol = token.rawValue
-            self.selectionView.configure(token)
-            self.confirmBtn.isEnabled = self.address.insertValid
-        }
-        navigationController?.pushViewController(vc, animated: true)
+        
     }
     
     @objc private func confirmAction() {

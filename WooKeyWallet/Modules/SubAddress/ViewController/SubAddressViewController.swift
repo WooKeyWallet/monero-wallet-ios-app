@@ -2,7 +2,7 @@
 //  SubAddressViewController.swift
 //  Wookey
 //
-//  Created by jowsing on 2019/5/14.
+//  Created by WookeyWallet on 2019/5/14.
 //  Copyright © 2019 Wookey. All rights reserved.
 //
 
@@ -82,6 +82,10 @@ class SubAddressViewController: BaseTableViewController {
             viewModel.dataSourceState.observe(self) { (data, _Self) in
                 _Self.dataSource = data
                 _Self.tableView.reloadData()
+            }
+            
+            viewModel.modalState.observe(self) { (viewController, SELF) in
+                SELF.navigationController?.present(viewController, animated: false, completion: nil)
             }
             
             viewModel.configureData()

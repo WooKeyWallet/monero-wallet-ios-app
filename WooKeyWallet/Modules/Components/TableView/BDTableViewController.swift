@@ -19,6 +19,5 @@ class BDTableViewController: BaseTableViewController {
         let row = dataSource[indexPath.section].rows[indexPath.row]
         return row.rowHeight
     }
-
 }
 

@@ -222,3 +222,46 @@ extension UIView {
         }
     }
 }
+
+// MARK: - Loading
+
+extension UIView {
+    
+    private struct AssociatedKeys {
+        static var indicatorView = "_indicatorView"
+    }
+    
+    var indicatorView: WKActivityIndicatorView? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKeys.indicatorView) as? WKActivityIndicatorView
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKeys.indicatorView, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
+    
+    func showIndicator(size: CGFloat = 22.0, color: UIColor = .systemGray) {
+        guard let superview = superview else { return }
+        if self.indicatorView == nil {
+            let scale = size / 20.0
+            self.indicatorView = WKActivityIndicatorView(style: .gray)
+            self.indicatorView?.transform = CGAffineTransform(scaleX: scale, y: scale)
+            self.indicatorView?.color = color
+            self.indicatorView?.backgroundColor = .clear
+            self.indicatorView?.hidesWhenStopped = true
+            superview.addSubview(self.indicatorView!)
+            self.indicatorView?.snp.makeConstraints({ (make) in
+                make.center.equalTo(self)
+            })
+        }
+        self.indicatorView?.isLoading = true
+        self.isUserInteractionEnabled = false
+    }
+    
+    func hideIndicator() {
+        guard let indicatorView = self.indicatorView else { return }
+        self.isUserInteractionEnabled = true
+        indicatorView.isLoading = false
+    }
+}
+

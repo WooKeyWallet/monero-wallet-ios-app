@@ -21,6 +21,7 @@ struct Transaction {
     var paymentId: String = ""
     var hash: String = ""
     var block: String = ""
+    var label: String = ""
     
     init(type: TransactionsType,
         amount: String,
@@ -30,7 +31,8 @@ struct Transaction {
         fee: String,
         paymentId: String,
         hash: String,
-        block: String)
+        block: String,
+        label: String)
     {
         self.type = type
         self.amount = amount
@@ -41,6 +43,7 @@ struct Transaction {
         self.paymentId = paymentId
         self.hash = hash
         self.block = block
+        self.label = label.isEmpty ? LocalizedString(key: "tagNull", comment: "") : label
     }
     
     init(item: TransactionItem) {
@@ -64,6 +67,7 @@ struct Transaction {
         case .sent:
             self.type = .out
         }
+        self.label = item.label.isEmpty ? LocalizedString(key: "tagNull", comment: "") : item.label
     }
 }
 

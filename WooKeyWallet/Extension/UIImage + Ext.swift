@@ -19,12 +19,11 @@ extension UIImage {
     
     class func bundleImage(_ name: String) -> UIImage? {
         guard
-            let bundlePath = Bundle.main.path(forResource: "WooKeyWallet", ofType: "bundle"),
-            let filePath = Bundle(path: bundlePath)?.path(forResource: name, ofType: "png", inDirectory: "images")
+            let filePath = Bundle.wookey?.path(forResource: name, ofType: "png", inDirectory: "images")
         else {
             return nil
         }
-        return UIImage.init(contentsOfFile: filePath)
+        return UIImage(contentsOfFile: filePath)
     }
     
 }

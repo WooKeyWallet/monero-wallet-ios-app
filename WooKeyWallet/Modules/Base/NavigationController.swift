@@ -51,7 +51,7 @@ class NavigationController: UINavigationController {
     
     override init(rootViewController: UIViewController) {
         super.init(rootViewController: rootViewController)
-        
+        self.modalPresentationStyle = .overCurrentContext
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -65,12 +65,22 @@ class NavigationController: UINavigationController {
             [weak self] () -> Void in
             guard let strongSelf = self else { return }
             strongSelf.view.backgroundColor = UIColor.white
+            if #available(iOS 13.0, *) {
+                let standardAppearance = strongSelf.navigationBar.standardAppearance
+                standardAppearance.backgroundColor = .clear
+                standardAppearance.backgroundEffect = UIBlurEffect(style: .extraLight)
+                standardAppearance.titleTextAttributes = [
+                    NSAttributedString.Key.foregroundColor : AppTheme.Color.navigationTitle,
+                    NSAttributedString.Key.font : AppTheme.Font.navigationTitle,
+                ]
+            } else {
+                strongSelf.navigationBar.backgroundColor = .clear
+                strongSelf.navigationBar.titleTextAttributes = [
+                    NSAttributedString.Key.foregroundColor : AppTheme.Color.navigationTitle,
+                    NSAttributedString.Key.font : AppTheme.Font.navigationTitle,
+                ]
+            }
             strongSelf.navigationBar.tintColor = AppTheme.Color.navigation_tintColor
-            strongSelf.navigationBar.backgroundColor = UIColor.clear
-            strongSelf.navigationBar.titleTextAttributes = [
-                NSAttributedString.Key.foregroundColor : AppTheme.Color.navigationTitle,
-                NSAttributedString.Key.font : AppTheme.Font.navigationTitle,
-            ]
             strongSelf.navigationBar.isTranslucent = true
             strongSelf.interactivePopGestureRecognizer?.delegate = strongSelf
             strongSelf.delegate = strongSelf
@@ -116,7 +126,10 @@ class NavigationController: UINavigationController {
     // MARK: - Methods (Private)
     
     private func hideBottomLine() {
-        if #available(iOS 11.0, *) {
+        if #available(iOS 13.0, *) {
+            navigationBar.standardAppearance.shadowImage = UIImage()
+            navigationBar.standardAppearance.shadowColor = .clear
+        } else if #available(iOS 11.0, *) {
             navigationBar.shadowImage = UIImage()
         } else {
             let bottomLine = navigationBar.findView({ $0.height <= 1 })

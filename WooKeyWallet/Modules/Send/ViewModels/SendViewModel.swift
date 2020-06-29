@@ -21,7 +21,7 @@ class SendViewModel: NSObject {
     
     private let asset: Assets
     private let token: TokenWallet
-    private let wallet: WalletProtocol
+    private let wallet: XMRWallet
     
     
     private var address: String = ""
@@ -47,7 +47,7 @@ class SendViewModel: NSObject {
     
     // MARK: - Life Cycle
     
-    init(asset: Assets, wallet: WalletProtocol) {
+    init(asset: Assets, wallet: XMRWallet) {
         self.asset = asset
         self.token = asset.wallet ?? TokenWallet()
         self.wallet = wallet
@@ -164,7 +164,7 @@ class SendViewModel: NSObject {
     /// Transactions
     
     func createTransaction(_ finish: (() -> Void)?) {
-        guard wallet.validAddress(address) else {
+        guard MoneroWalletWrapper.validAddress(address) else {
             HUD.showError(LocalizedString(key: "address.validate.fail", comment: ""))
             return
         }
@@ -199,6 +199,7 @@ class SendViewModel: NSObject {
         HUD.showHUD()
         DispatchQueue.global().async {
             let success = self.wallet.commitPendingTransaction()
+            if success { self.wallet.disposeTransaction() }
             DispatchQueue.main.async {
                 HUD.hideHUD()
                 if success {

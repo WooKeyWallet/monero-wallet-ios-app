@@ -2,7 +2,7 @@
 //  AddSubAddressController.swift
 //  Wookey
 //
-//  Created by jowsing on 2019/5/14.
+//  Created by WookeyWallet on 2019/5/14.
 //  Copyright © 2019 Wookey. All rights reserved.
 //
 
@@ -13,6 +13,8 @@ class AddSubAddressController: BaseViewController {
     // MARK: - Properties (Public)
     
     public let viewModel: SubAddressViewModel
+    
+    public var subAddress: SubAddress?
     
     
     // MARK: - Properties (Lazy)
@@ -63,6 +65,9 @@ class AddSubAddressController: BaseViewController {
             contentView.backgroundColor = UIColor.init(white: 0, alpha: 0.5)
             contentView.titleStatusView.backgroundColor = AppTheme.Color.status_green
             contentView.titleLabel.text = LocalizedString(key: "wallet.subAddress.add.title", comment: "")
+            if subAddress != nil {
+                contentView.confirmBtn.setTitle(LocalizedString(key: "save", comment: ""), for: .normal)
+            }
             
             // textView
             contentView.customView.addSubview(textView)
@@ -91,8 +96,15 @@ class AddSubAddressController: BaseViewController {
     }
     
     @objc private func confirmAction() {
-        viewModel.addSubAddress(label: textView.text)
-        dismiss(animated: false, completion: nil)
+        let text = self.textView.text ?? ""
+        let (viewModel, label, subAddress) = (self.viewModel, text.isEmpty ? LocalizedString(key: "tagNull", comment: "") : text, self.subAddress)
+        dismiss(animated: false) {
+            if let model = subAddress {
+                viewModel.setSubAddress(label: label, row: model.rowId)
+            } else {
+                viewModel.addSubAddress(label: label)
+            }
+        }
     }
 
 }

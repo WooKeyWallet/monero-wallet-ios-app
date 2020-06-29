@@ -156,7 +156,6 @@ class SeedVerifyViewController: BaseViewController {
         } else {
             AppManager.default.rootIn()
         }
-        WalletService.shared.createFinish()
     }
 
 }

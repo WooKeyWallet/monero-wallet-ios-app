@@ -30,7 +30,6 @@ class WKAlertController: BaseViewController {
     
     override init() {
         super.init()
-        modalPresentationStyle = .overCurrentContext
     }
     
     required init?(coder aDecoder: NSCoder) {

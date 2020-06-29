@@ -34,6 +34,7 @@ class BaseViewController: UIViewController {
     
     init() {
         super.init(nibName: nil, bundle: nil)
+        self.modalPresentationStyle = .overCurrentContext
     }
     
     required init?(coder aDecoder: NSCoder) {

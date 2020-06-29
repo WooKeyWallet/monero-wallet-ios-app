@@ -49,12 +49,13 @@ class TokenWalletDetailViewModel: NSObject {
                 [],
                 [
                     (title: LocalizedString(key: "wallet.detail.name", comment: ""), detail: self.tokenWallet.label, showArrow: false),
-                    (title: LocalizedString(key: "wallet.subAddress.title", comment: ""), detail: WalletService.displayAddress(self.tokenWallet.address), showArrow: true),
+                    (title: LocalizedString(key: "wallet.subAddress.title", comment: ""), detail: self.tokenWallet.displayAddress(), showArrow: true),
                 ],
                 [
                     (title: LocalizedString(key: "wallet.detail.pwd.tips", comment: ""), detail: "", showArrow: true),
                     (title: LocalizedString(key: "wallet.detail.import.seed", comment: ""), detail: "", showArrow: true),
                     (title: LocalizedString(key: "wallet.detail.import.keys", comment: ""), detail: "", showArrow: true),
+                    (title: LocalizedString(key: "wallet.detail.localAuth", comment: ""), detail: "", showArrow: true),
                 ],
             ]
             let row_1_0 = TableViewRow.init(modelList[1][0], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
@@ -72,6 +73,7 @@ class TokenWalletDetailViewModel: NSObject {
             var row_2_0 = TableViewRow.init(modelList[2][0], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
             var row_2_1 = TableViewRow.init(modelList[2][1], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
             var row_2_2 = TableViewRow.init(modelList[2][2], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
+            var row_2_3 = TableViewRow.init(modelList[2][3], cellType: TokenWalletDetailViewCell.self, rowHeight: 52)
             row_2_0.didSelectedAction = {
                 [unowned self] _ in
                 DispatchQueue.main.async {
@@ -90,7 +92,13 @@ class TokenWalletDetailViewModel: NSObject {
                     self.toExportKeys()
                 }
             }
-            var section2 = TableViewSection.init([row_2_0, row_2_1, row_2_2])
+            row_2_3.didSelectedAction = {
+                [unowned self] _ in
+                DispatchQueue.main.async {
+                    self.toLocalAuth()
+                }
+            }
+            var section2 = TableViewSection.init([row_2_0, row_2_1, row_2_2, row_2_3])
             section2.headerHeight = 0.01
             section2.footerHeight = 10
             
@@ -126,32 +134,25 @@ class TokenWalletDetailViewModel: NSObject {
     }
     
     private func toSubAddress() {
-        LoginViewController.show(walletName: tokenWallet.label) {
-        [unowned self] (pwd) in
+        LoginViewController.loginWithOptions(.exportKeys, walletName: tokenWallet.label) { [unowned self] (pwd) in
             guard let pwd = pwd else { return }
             HUD.showHUD()
-            WalletService.shared.safeOperation({
-                do {
-                    let wallet = try WalletService.shared.loginWallet(self.tokenWallet.label, password: pwd)
-                    let viewModel = SubAddressViewModel(wallet: wallet, deallocClosure: { _wallet in
-                        WalletService.shared.safeOperation({
-                            _wallet.lock()
+            WalletService.shared.openWallet(self.tokenWallet.label, password: pwd) { (result) in
+                DispatchQueue.main.async {
+                    HUD.hideHUD()
+                    switch result {
+                    case .success(let wallet):
+                        let viewModel = SubAddressViewModel(wallet: wallet, deallocClosure: { _wallet in
+                            _wallet.close()
                         })
-                    })
-                    let vc = SubAddressViewController(viewModel: viewModel)
-                    DispatchQueue.main.async {
-                        HUD.hideHUD()
+                        let vc = SubAddressViewController(viewModel: viewModel)
                         AppManager.default.rootViewController?.pushViewController(vc, animated: true)
-                    }
-                } catch {
-                    DispatchQueue.main.async {
-                        HUD.hideHUD()
+                    case .failure(_):
                         HUD.showError(LocalizedString(key: "loadFail", comment: ""))
                     }
                 }
-            })
+            }
         }
-        
     }
     
     private func showPasswordTips() {
@@ -164,7 +165,8 @@ class TokenWalletDetailViewModel: NSObject {
     }
     
     private func toExportSeed() {
-        LoginViewController.show(walletName: tokenWallet.label) { [unowned self] (pwd) in
+        LoginViewController.loginWithOptions(.exportKeys, walletName: tokenWallet.label) {
+            [unowned self] (pwd) in
             guard let pwd = pwd else { return }
             let vc = ExportWalletSeedViewController.init(walletName: self.tokenWallet.label, password: pwd)
             AppManager.default.rootViewController?.pushViewController(vc, animated: true)
@@ -172,9 +174,19 @@ class TokenWalletDetailViewModel: NSObject {
     }
     
     private func toExportKeys() {
-        LoginViewController.show(walletName: tokenWallet.label) { [unowned self] (pwd) in
+        LoginViewController.loginWithOptions(.exportKeys, walletName: tokenWallet.label) {
+            [unowned self] (pwd) in
             guard let pwd = pwd else { return }
             let vc = ExportWalletKeysViewController.init(walletName: self.tokenWallet.label, password: pwd)
+            AppManager.default.rootViewController?.pushViewController(vc, animated: true)
+        }
+    }
+    
+    private func toLocalAuth() {
+        LoginViewController.show(walletName: tokenWallet.label) { [unowned self] (pwd) in
+            guard let pwd = pwd else { return }
+            let viewModel = LocalAuthViewModel(walletName: self.tokenWallet.label, password: pwd)
+            let vc = LocalAuthViewController(viewModel: viewModel)
             AppManager.default.rootViewController?.pushViewController(vc, animated: true)
         }
     }
@@ -184,11 +196,12 @@ class TokenWalletDetailViewModel: NSObject {
             HUD.showError(LocalizedString(key: "delete.wallet.onlineError", comment: ""))
             return
         }
-        LoginViewController.show(walletName: tokenWallet.label) { [unowned self] (pwd) in
+        let walletName = tokenWallet.label
+        LoginViewController.show(walletName: walletName) { (pwd) in
             guard let _ = pwd else { return }
             HUD.showHUD()
-            WalletService.shared.safeOperation({
-                guard WalletService.shared.removeWallet(self.tokenWallet.label) else {
+            DispatchQueuePool.shared["XMRWallet:" + walletName].async {
+                guard WalletService.shared.removeWallet(walletName) else {
                     DispatchQueue.main.async {
                         HUD.showError(LocalizedString(key: "delete.failure", comment: ""))
                     }
@@ -199,7 +212,7 @@ class TokenWalletDetailViewModel: NSObject {
                     HUD.showSuccess(LocalizedString(key: "delete.success", comment: ""))
                     AppManager.default.rootViewController?.popViewController(animated: true)
                 }
-            })
+            }
         }
     }
 }

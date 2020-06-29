@@ -59,12 +59,12 @@ class AssetsViewController: BaseTableViewController {
             
             footer.configureHandlers { [unowned self] (index) in
                 guard let wallet = self.wallet else { return }
-                LoginViewController.show(walletName: wallet.name, loginResult: { [unowned self] (pwd) in
+                LoginViewController.loginWithOptions(.openWallet, walletName: wallet.name) { [unowned self] (pwd) in
                     guard let pwd = pwd else { return }
                     var assets = self.assetsList[index]
                     assets.wallet = TokenWallet.init(wallet)
                     self.navigationController?.pushViewController(AssetsTokenViewController.init(tokenAssets: assets, pwd: pwd), animated: true)
-                })
+                }
             }
         }
         
@@ -105,7 +105,8 @@ class AssetsViewController: BaseTableViewController {
     }
     
     @objc private func copyAction() {
-        UIPasteboard.general.string = WalletService.displayAddress(wallet?.address ?? "")
+        guard let wallet = wallet else { return }
+        UIPasteboard.general.string = TokenWallet(wallet).displayAddress()
         HUD.showSuccess(LocalizedString(key: "copy_success", comment: ""))
     }
 }

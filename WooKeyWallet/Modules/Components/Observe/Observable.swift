@@ -65,3 +65,10 @@ class Observable<T> {
         self.observerList.append(observer)
     }
 }
+
+extension Observable where Value: Equatable {
+    func update(_ newValue: Value) {
+        guard newValue != _value else { return }
+        self.value = newValue
+    }
+}

@@ -241,14 +241,16 @@ class ExportWalletKeysViewController: BaseViewController {
     
     private func openWallet(_ name: String, pwd: String) {
         HUD.showHUD()
-        WalletService.shared.safeOperation {
-            do {
-                let wallet = try WalletService.shared.loginWallet(name, password: pwd)
-                let (publicViewKey, publicSpendKey, secretViewKey, secretSpendKey, address) = (wallet.publicViewKey,
-                                                                                               wallet.publicSpendKey,
-                                                                                               wallet.secretViewKey,
-                                                                                               wallet.secretSpendKey,
-                                                                                               wallet.publicAddress)
+        WalletService.shared.openWallet(name, password: pwd) { (result) in
+            switch result {
+            case .success(let wallet):
+                let (publicViewKey, publicSpendKey, secretViewKey, secretSpendKey, address) =
+                (wallet.publicViewKey,
+                wallet.publicSpendKey,
+                wallet.secretViewKey,
+                wallet.secretSpendKey,
+                wallet.publicAddress)
+                wallet.close()
                 DispatchQueue.main.async {
                     HUD.hideHUD()
                     self.publicViewKeyField.text = publicViewKey
@@ -258,8 +260,7 @@ class ExportWalletKeysViewController: BaseViewController {
                     self.addressField.text = address
                     self.scrollView.resizeContentLayout()
                 }
-                wallet.lock()
-            } catch {
+            case .failure(_):
                 DispatchQueue.main.async {
                     HUD.hideHUD()
                     HUD.showError(LocalizedString(key: "wallet.detail.import.error", comment: ""))

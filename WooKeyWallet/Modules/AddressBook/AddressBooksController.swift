@@ -13,6 +13,11 @@ class AddressBooksController: BaseTableViewController {
     var didSelected: ((String) -> Void)?
     
     
+    // MARK: - Properties (private)
+    
+    private var addressList = [Address]()
+    
+    
     // MARK: - Life Cycles
 
     override func configureUI() {
@@ -55,20 +60,28 @@ class AddressBooksController: BaseTableViewController {
     private func loadData() {
         DispatchQueue.global().async {
             var state = TableViewPlaceholder.State.none
-            if let list = DBService.shared.getAddressList() {
-                let rowList = list.map({ TableViewRow.init(AddressBook.init($0), cellType: AddressBookViewCell.self) })
-                let section = TableViewSection(rowList)
-                self.dataSource = [section]
-                if rowList.count == 0 {
-                    state = .withoutData
+            self.addressList = DBService.shared.getAddressList() ?? []
+            let rowList: [TableViewRow] = self.addressList.map({ address in
+                var row = TableViewRow.init(AddressBook(address), cellType: AddressBookViewCell.self)
+                row.actionHandler = { [unowned self] value in
+                    guard let action = value as? TableViewRowAction else { return }
+                    switch action {
+                    case .delete(let indexPath): // 删除
+                        self.deleteConfirm(address, indexPath: indexPath)
+                    case .edit: // 编辑
+                        self.toEdit(address)
+                    default: break
+                    }
                 }
-                DispatchQueue.main.async {
-                    self.tableView.reloadData()
-                }
-            } else {
+                return row
+            })
+            let section = TableViewSection(rowList)
+            self.dataSource = [section]
+            if rowList.count == 0 {
                 state = .withoutData
             }
             DispatchQueue.main.async {
+                self.tableView.reloadData()
                 self.tableViewPlaceholder.state = state
             }
         }
@@ -80,5 +93,29 @@ class AddressBooksController: BaseTableViewController {
     @objc private func addAction() {
         navigationController?.pushViewController(AddressBookAddController(), animated: true)
     }
-
+    
+    private func toEdit(_ address: Address) {
+        let textFiled = UITextField()
+        textFiled.placeholder = LocalizedString(key: "addressbook.edit.placeholder", comment: "")
+        let alert = AlertInputViewController(title: LocalizedString(key: "addressbook.edit.title", comment: ""), textField: textFiled)
+        alert.addAction(WKAlertAction(title: LocalizedString(key: "save", comment: ""), style: .confirm) { [unowned self] (action) in
+            address.notes = textFiled.text ?? ""
+            if DBService.shared.update(on: [Address.Properties.notes], with: address, condition: Address.Properties.id.is(address.id)) {
+                self.loadData()
+            }
+        })
+        alert.addAction(WKAlertAction(title: nil, style: .cancel))
+        DispatchQueue.main.async {
+            self.present(alert, animated: false, completion: nil)
+        }
+    }
+    
+    private func deleteConfirm(_ address: Address, indexPath: IndexPath) {
+        if DBService.shared.deleteAddress(Address.Properties.address.is(address.address)) {
+            addressList.remove(at: indexPath.row)
+            dataSource[indexPath.section].rows.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .automatic)
+        }
+    }
 }
+

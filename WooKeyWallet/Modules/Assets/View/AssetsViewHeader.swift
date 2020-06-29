@@ -73,8 +73,8 @@ class AssetsViewHeader: UIView {
         walletNameLabel.text = model.name
         
         let key = model.address
-        WalletDefaults.shared.subAddressIndexState.observe(self) { (_, _Self) in
-            _Self.walletAddressLabel.text = WalletService.displayAddress(key)
+        WalletDefaults.shared.subAddressIndexState.observe(self) { (subAddress, _Self) in
+            _Self.walletAddressLabel.text = subAddress[key]?.address ?? key
         }
     }
     

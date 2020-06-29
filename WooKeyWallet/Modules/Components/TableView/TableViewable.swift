@@ -4,13 +4,15 @@
 
 import UIKit
 
-
-protocol TableViewRowable where Self: UITableViewCell {
+protocol TableViewCellProtocol where Self: UITableViewCell {
     func configure(with row: TableViewRow)
 }
 
-typealias TableViewCellProtocol = Reusable & TableViewRowable
-
+enum TableViewRowAction {
+    case delete(indexPath: IndexPath)
+    case edit
+    case custom(sender: Any)
+}
 
 struct TableViewSection {
     var rows = [TableViewRow]()
@@ -30,13 +32,11 @@ struct TableViewSection {
     }
 }
 
-
-
 struct TableViewRow {
     
     var rowHeight: CGFloat
     var estimatedHeight: CGFloat
-    var cellType: BaseTableViewCell.Type = BaseTableViewCell.self
+    var cellType: TableViewCellProtocol.Type = BaseTableViewCell.self
     var indexPath: IndexPath?
     var tableViewWidth: CGFloat
     var selectionStyle: UITableViewCell.SelectionStyle?
@@ -45,7 +45,7 @@ struct TableViewRow {
     var didSelectedAction: ((Int) -> Void)?
     var actionHandler: ((Any) -> Void)?
     
-    init(_ model: Any? = nil, cellType: BaseTableViewCell.Type = BaseTableViewCell.self, rowHeight: CGFloat = 50) {
+    init(_ model: Any? = nil, cellType: TableViewCellProtocol.Type = BaseTableViewCell.self, rowHeight: CGFloat = 50) {
         self.model = model
         self.rowHeight = rowHeight
         self.estimatedHeight = 0

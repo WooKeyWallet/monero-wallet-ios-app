@@ -55,7 +55,6 @@ class ImportWalletViewController: BaseViewController {
         viewModel.showDatePickerState.observe(self) { (picker, strongSelf) in
             DispatchQueue.main.async {
                 strongSelf.definesPresentationContext = true
-                picker.modalPresentationStyle = .overCurrentContext
                 strongSelf.present(picker, animated: false, completion: nil)
             }
         }

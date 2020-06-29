@@ -38,4 +38,9 @@ struct TokenWallet {
     func getToken() -> Token {
         return Token(rawValue: token) ?? .xmr
     }
+    
+    func displayAddress() -> String {
+        return WalletDefaults.shared.subAddressIndexState.value[address]?.address ?? address
+    }
+    
 }

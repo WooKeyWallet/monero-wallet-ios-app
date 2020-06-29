@@ -20,35 +20,35 @@ class CreateWalletViewModel: NSObject {
     
     lazy var pwdRankState = { Observable<Int>(0) }()
     
-    lazy var pushState = { Observable<UIViewController?>(nil) }()
+    lazy var pushState = { Postable<UIViewController?>() }()
     
     
     
     // MARK: - Properties (Private)
     
-    private var create: WalletCreate
+    private let style: CreateWalletStyle
+    private var data = NewWallet()
     
     
     private var pwdConfirmText = ""
     
-    private var isNameVaild: Bool { get { return !FileManager.default.fileExists(atPath: create.name!.filePaths.document) } }
-    private var isPwdFormatVaild: Bool { get { return create.pwd!.count >= 8 } }
-    private var isPwdConfirmVaild: Bool { get { return create.pwd == pwdConfirmText } }
+    private var isNameVaild: Bool { get { return !data.name.isEmpty && !FileManager.default.fileExists(atPath: data.name.filePaths.document) } }
+    private var isPwdFormatVaild: Bool { get { return data.pwd.count >= 8 } }
+    private var isPwdConfirmVaild: Bool { get { return data.pwd == pwdConfirmText } }
     
     
     // MARK: - Life Cycles
     
-    init(create: WalletCreate) {
-        self.create = create
+    init(style: CreateWalletStyle) {
+        self.style = style
         super.init()
     }
-    
     
     
     // MARK: - Methods (Public)
     
     func navigationTitle() -> String {
-        switch create.mode {
+        switch style {
         case .new:
             return LocalizedString(key: "wallet.add.create", comment: "")
         case .recovery:
@@ -68,9 +68,9 @@ class CreateWalletViewModel: NSObject {
         }
         let vaild = charCount <= 20
         if vaild {
-            self.create.name = text
+            self.data.name = text
         } else {
-            self.nameTextState.value = self.create.name ?? ""
+            self.nameTextState.value = self.data.name
         }
         self.nameErrorState.value = nil
         self.nextState.value = isVaildNext()
@@ -78,7 +78,7 @@ class CreateWalletViewModel: NSObject {
     
     func pwdFieldInput(_ text: String) {
         self.calculatePwdStrength(text)
-        self.create.pwd = text
+        self.data.pwd = text
         self.pwdErrorState.value = nil
         self.nextState.value = isVaildNext()
     }
@@ -90,7 +90,7 @@ class CreateWalletViewModel: NSObject {
     }
     
     func pwdTipsFieldInput(_ text: String) {
-        self.create.pwdTips = text
+        self.data.pwdTips = text
     }
     
     func pwdSecureTextEntryClick() {
@@ -125,25 +125,24 @@ class CreateWalletViewModel: NSObject {
             return
         }
         
-        switch create.mode {
+        switch style {
         case .new:
             HUD.showHUD()
-            WalletService.shared.safeOperation {
-                do {
-                    let wallet = try WalletService.shared.createWallet(self.create)
-                    if let db_wallets = DBService.shared.getWallets(Wallet.Properties.name.is(self.create.name!), orderBy: nil) {
+            WalletService.shared.createWallet(with: .new(data: data)) { (result) in
+                switch result {
+                case .success(let wallet):
+                    if let db_wallets = DBService.shared.getWallets(Wallet.Properties.name.is(self.data.name), orderBy: nil) {
                         db_wallets.forEach({
-                            if $0.symbol == self.create.token.rawValue {
-                                WalletDefaults.shared.proceedWalletID = $0.id
-                            }
+                            WalletDefaults.shared.proceedWalletID = $0.id
                         })
                     }
+                    let seed = wallet.seed
+                    wallet.close()
                     DispatchQueue.main.async {
                         HUD.hideHUD()
-                        self.pushState.value = SeedViewController.init(wallet: wallet, create: self.create)
-                        self.pushState.value = nil
+                        self.pushState.newState(SeedViewController(seed: seed))
                     }
-                } catch {
+                case .failure(_):
                     DispatchQueue.main.async {
                         HUD.hideHUD()
                         HUD.showError("创建失败")
@@ -151,9 +150,9 @@ class CreateWalletViewModel: NSObject {
                 }
             }
         case .recovery:
-            let vc = ImportWalletViewController.init(viewModel: ImportWalletViewModel.init(create: create))
-            pushState.value = vc
-            pushState.value = nil
+            let viewModel = ImportWalletViewModel(data: data)
+            let vc = ImportWalletViewController(viewModel: viewModel)
+            pushState.newState(vc)
         }
     }
     
@@ -226,7 +225,7 @@ class CreateWalletViewModel: NSObject {
     }
     
     private func isVaildNext() -> Bool {
-        return (create.name ?? "").count > 0 && (create.pwd ?? "").count > 0 && agreementState.value && pwdConfirmText.count > 0
+        return !data.name.isEmpty && !data.pwd.isEmpty && !pwdConfirmText.isEmpty && agreementState.value
     }
     
 }

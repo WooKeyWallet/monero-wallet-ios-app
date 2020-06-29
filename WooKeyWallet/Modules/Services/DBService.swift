@@ -243,6 +243,17 @@ class DBService: NSObject {
         return status
     }
     
+    func deleteAddress(_ condition: Condition) -> Bool {
+        var status = true
+        do {
+            try database.delete(fromTable: DBTableNames.address_books, where: condition)
+        } catch {
+            dPrint(error)
+            status = false
+        }
+        return status
+    }
+    
     func getTransactionList(condition: Condition, orderBy: [OrderBy]? = nil) -> [Transaction]? {
         do {
             let codingKeys: [PropertyConvertible] = _Transaction_.Properties.all

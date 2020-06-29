@@ -4,7 +4,22 @@
 
 import Foundation
 
-public struct WalletRecovery {
+public enum CreateWalletStyle {
+    case new(data: NewWallet)
+    case recovery(data: NewWallet, recover: RecoverWallet)
+}
+
+public struct NewWallet {
+    var name: String = ""
+    var pwd: String = ""
+    var pwdTips: String?
+    
+    static var empty: NewWallet {
+        return NewWallet()
+    }
+}
+
+public struct RecoverWallet {
     
     enum From {
         case seed
@@ -52,24 +67,11 @@ public struct WalletRecovery {
         }
         return Keys.init(restoreHeight: restoreHeight, addressString: addr, viewKeyString: viewKey, spendKeyString: spendKey)
     }
-}
-
-public struct WalletCreate {
     
-    enum Mode {
-        case new
-        case recovery
+    static var empty: RecoverWallet {
+        return RecoverWallet(from: .seed)
     }
-    
-    var mode: Mode = .new
-    let token: Token = .xmr
-    var name: String?
-    var pwd: String?
-    var pwdTips: String?
-    
-    var recovery: WalletRecovery?
 }
-
 
 
 

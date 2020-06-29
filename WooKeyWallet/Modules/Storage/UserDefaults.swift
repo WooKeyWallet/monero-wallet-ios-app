@@ -5,12 +5,15 @@
 import UIKit
 
 private struct KeyPath {
+    static let localAuthOptions = "localAuthOptionsKey"
     static let walletsCount = "walletsCountKey"
     static let node_current = "node_current_key"
     static let wallet_proceed = "walletProceedKey"
+    static let wallet_subAddress = "walletSubAddressKey"
     static let wallet_subAddress_index = "walletIndexSubAddressKey"
     static let hiddenAsset = "hiddenAssetKey"
-    static let subAddressLabels = "Labels-"
+    static let hasFaceOrTouchID = "faceOrTouchIDKey"
+    static let hasGesturePassword = "gesturePasswordKey"
 }
 
 public class WalletDefaults: UserDefaults {
@@ -18,6 +21,31 @@ public class WalletDefaults: UserDefaults {
     // MARK: - Properties
     
     public static let shared = { return WalletDefaults(suiteName: "WalletUserDefaults")! }()
+    
+    public var localAuthOptions: [LocalAuthOptions] {
+        get { return [LocalAuthOptions](rawValues: array(forKey: KeyPath.localAuthOptions) as? [Int]) }
+        set {
+            set(newValue.map({$0.rawValue}), forKey: KeyPath.localAuthOptions)
+            if newValue.isEmpty {
+                self.hasFaceOrTouchID = false
+                self.hasGesturePassword = false
+            }
+        }
+    }
+    
+    public var hasFaceOrTouchID: Bool {
+        get { return bool(forKey: KeyPath.hasFaceOrTouchID) }
+        set {
+            set(newValue, forKey: KeyPath.hasFaceOrTouchID)
+        }
+    }
+    
+    public var hasGesturePassword: Bool {
+        get { return bool(forKey: KeyPath.hasGesturePassword) }
+        set {
+            set(newValue, forKey: KeyPath.hasGesturePassword)
+        }
+    }
     
     public var walletsCount: Int {
         get { return integer(forKey: KeyPath.walletsCount) }
@@ -42,11 +70,15 @@ public class WalletDefaults: UserDefaults {
         }
     }
     
-    public typealias SubAddressIndexs = [String: String]
-    public var subAddressIndexs: SubAddressIndexs {
-        get { return value(forKey: KeyPath.wallet_subAddress_index) as? SubAddressIndexs ?? [:] }
+    public typealias SubAddressIndexs = [String: SubAddress]
+    public var subAddress: SubAddressIndexs {
+        get {
+            let json = value(forKey: KeyPath.wallet_subAddress) as? [String: Data] ?? [:]
+            return json.compactMapValues({ try? JSONDecoder().decode(SubAddress.self, from: $0) })
+        }
         set {
-            set(newValue, forKey: KeyPath.wallet_subAddress_index)
+            let json = newValue.compactMapValues({ try? JSONEncoder().encode($0) })
+            self.set(json, forKey: KeyPath.wallet_subAddress)
             if newValue != subAddressIndexState.value {
                 DispatchQueue.main.async {
                     self.subAddressIndexState.value = newValue
@@ -62,20 +94,16 @@ public class WalletDefaults: UserDefaults {
         }
     }
     
-    lazy var subAddressIndexState = { Observable<SubAddressIndexs>(subAddressIndexs) }()
+    lazy var subAddressIndexState = { Observable<SubAddressIndexs>(subAddress) }()
     
-    
-    // MARK: - Methods
-    
-    func addSubAddress(label: String, publicAddress: String) {
-        let key = KeyPath.subAddressLabels + publicAddress
-        var labels = value(forKey: key) as? [String] ?? []
-        labels.append(label)
-        setValue(labels, forKey: key)
+    public func upgrade() {
+        
     }
     
-    func getSubAddressLabels(_ publicAddress: String) -> [String] {
-        let key = KeyPath.subAddressLabels + publicAddress
-        return value(forKey: key) as? [String] ?? []
+}
+
+extension WalletDefaults {
+    convenience init(wallet name: String) {
+        self.init(suiteName: "WalletUserDefaults_" + name)!
     }
 }
